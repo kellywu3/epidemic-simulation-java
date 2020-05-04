@@ -1,4 +1,4 @@
-package kelly.simulation;
+package kelly.simulation.things;
 
 import java.awt.*;
 
