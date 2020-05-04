@@ -2,21 +2,22 @@ package kelly.simulation.things;
 
 import kelly.simulation.Animatable;
 import kelly.simulation.HealthStatus;
-import kelly.simulation.Locatable;
+import kelly.simulation.Simulatable;
+import kelly.simulation.domain.Position;
 
 import java.awt.*;
 import java.util.Random;
 
-public class Subject implements Animatable, Locatable {
-    private float x;
-    private float y;
+public class Subject implements Animatable, Simulatable {
+    private Position position;
+    private Position destination;
+    private int framesToDestination;
     private HealthStatus health;
     private int infectedTime;
     private Random random = new Random();
 
-    public Subject(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public Subject(Position position) {
+        this.position = position;
         int rnd = random.nextInt(HealthStatus.values().length);
         this.health = HealthStatus.values()[rnd];
         this.infectedTime = random.nextInt(100);
@@ -28,12 +29,19 @@ public class Subject implements Animatable, Locatable {
     }
 
     @Override
-    public float getX() {
-        return x;
+    public Position getPosition() {
+        return position;
     }
 
     @Override
-    public float getY() {
-        return y;
+    public void simulate() {
+        if(framesToDestination <= 0 || destination == null) {
+            framesToDestination = random.nextInt(600) + 240;
+            destination = new Position(random.nextFloat() * 640, random.nextFloat() * 480);
+        }
+        position.moveTowards(destination, framesToDestination --);
+    }
+
+    public void travel(float newX, float newY, int frames) {
     }
 }
