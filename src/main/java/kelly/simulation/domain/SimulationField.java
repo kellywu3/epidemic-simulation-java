@@ -9,7 +9,7 @@ import java.util.Set;
 public class SimulationField {
     private static final int SUBJECTS = 100;
     private static final long DELAY = 10;
-    private static final double SUBJECT_MASS = 3;
+    private static final double SUBJECT_MASS = 5;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
     private static final int[] BOUNDS = new int[] {640, 480};
     private static final double ODDS_INITIAL_SICK = 0.02;
@@ -21,6 +21,9 @@ public class SimulationField {
     private Set<SimulationEventListener> listeners;
     private Subject[] subjects;
     private int timeIndex;
+
+    private double[] destination = new double[] {0.5 * BOUNDS[0], 0.5 * BOUNDS[1]};
+    private double oddsOfDestination = 0.02;
 
     public SimulationField() {
         this.subjects =  new Subject[SUBJECTS];
@@ -63,10 +66,18 @@ public class SimulationField {
     public void startSimulation() {
         timeIndex = subjects.length + 1;
         while(true) {
+            assignDestination();
             updateSubjects();
             publishEvent();
             safeSleep(DELAY);
             timeIndex++;
+        }
+    }
+
+    private void assignDestination() {
+        if (random.nextDouble() < oddsOfDestination) {
+            int s = random.nextInt(subjects.length);
+            subjects[s].assignDestination(destination, false);
         }
     }
 
