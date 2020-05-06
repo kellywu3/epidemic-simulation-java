@@ -22,4 +22,13 @@ public class MatrixUtil {
         }
         return first;
     }
+
+    public static double distanceSquared(double[] p1, double[] p2) {
+        double distanceSquared = 0;
+        for(int i = 0; i < p1.length; i++) {
+            double d = p2[i] - p1[i];
+            distanceSquared += (d * d);
+        }
+        return distanceSquared;
+    }
 }

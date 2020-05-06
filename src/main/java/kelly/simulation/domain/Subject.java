@@ -10,19 +10,29 @@ public class Subject {
     private double[] oldLocation;
 
     private double mass;
-    private HealthStatus status;
+    private HealthStatus status = HealthStatus.SUSCEPTIBLE;
     private int eventTime;
+    private int timeToChange = -1;
 
-    public Subject(double[] position, double[] velocity, double mass, HealthStatus status) {
+    public Subject(double[] position, double[] velocity, double mass) {
         this.position = position;
         this.velocity = velocity;
         this.mass = mass;
-        this.status = status;
     }
 
-    public void update(double[] force, int[] bound, int dt) {
+    public void updateHealth(HealthStatus status, int timeIndex, int duration) {
+        this.status = status;
+        this.eventTime = timeIndex;
+        this.timeToChange = eventTime + duration;
+    }
+
+    public boolean isTimeToChange(int timeIndex) {
+        return timeToChange >= 0 && timeIndex > timeToChange;
+    }
+
+    public void update(double[] force, int[] bound, int dt, double forceFactor) {
         if(destination != null) {
-            applyDestinationForce(2, force);
+            applyDestinationForce(forceFactor, force);
         }
         for(int i = 0; i < force.length; i++) {
             double a = force[i] / mass;
@@ -62,7 +72,7 @@ public class Subject {
         }
     }
 
-    private void applyDestinationForce(int forceFactor, double[] force) {
+    private void applyDestinationForce(double forceFactor, double[] force) {
         double[] destinationForce = new double[position.length];
         double distanceSquared = 0;
         for(int i = 0; i < position.length; i++) {
