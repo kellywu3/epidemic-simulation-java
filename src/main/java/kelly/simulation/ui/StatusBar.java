@@ -1,4 +1,4 @@
-package kelly.simulation;
+package kelly.simulation.ui;
 
 import kelly.simulation.domain.SimulationEventListener;
 import kelly.simulation.domain.SimulationField;
@@ -45,5 +45,13 @@ public class StatusBar extends JPanel implements SimulationEventListener {
     public void onSimulationEvent() {
         NumberFormat nf = NumberFormat.getNumberInstance();
         timeValue.setText(nf.format(field.getTimeIndex()));
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        g.setColor(Color.BLACK);
+        g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+        g.drawRect(2, 2, getWidth() - 5, getHeight() - 5);
     }
 }

@@ -1,4 +1,4 @@
-package kelly.simulation;
+package kelly.simulation.ui;
 
 import kelly.simulation.domain.SimulationEventListener;
 import kelly.simulation.domain.SimulationField;
@@ -6,10 +6,10 @@ import kelly.simulation.domain.SimulationField;
 import javax.swing.*;
 import java.awt.*;
 
-public class DrawingPane extends JComponent implements SimulationEventListener {
+public class SimulationDisplay extends JComponent implements SimulationEventListener {
     private SimulationField simulationField;
 
-    public DrawingPane(SimulationField simulationField) {
+    public SimulationDisplay(SimulationField simulationField) {
         this.simulationField = simulationField;
         simulationField.addSimulationEventListener(this);
     }

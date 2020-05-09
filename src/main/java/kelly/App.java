@@ -1,7 +1,8 @@
 package kelly;
 
-import kelly.simulation.DrawingPane;
-import kelly.simulation.StatusBar;
+import kelly.simulation.ui.SIRChart;
+import kelly.simulation.ui.SimulationDisplay;
+import kelly.simulation.ui.StatusBar;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
@@ -20,10 +21,13 @@ public class App
 
         JFrame jf = new JFrame("Epidemic Simulation");
         jf.getContentPane().setLayout(new BorderLayout());
-        DrawingPane dp = new DrawingPane(field);
-        jf.add(dp, BorderLayout.CENTER);
+        SimulationDisplay sp = new SimulationDisplay(field);
+        jf.add(sp, BorderLayout.CENTER);
 
         jf.add(new StatusBar(field), BorderLayout.SOUTH);
+
+        SIRChart sir = new SIRChart(field);
+        jf.add(sir, BorderLayout.WEST);
 
         jf.pack();
         jf.setVisible(true);

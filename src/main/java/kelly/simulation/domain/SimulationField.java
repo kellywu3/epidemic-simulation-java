@@ -1,7 +1,7 @@
 package kelly.simulation.domain;
 
 import kelly.simulation.MatrixUtil;
-import kelly.simulation.StatusBar;
+import kelly.simulation.ui.StatusBar;
 import kelly.simulation.things.Animatable;
 import kelly.simulation.things.RadiatingDot;
 
@@ -9,13 +9,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class SimulationField implements ActionListener {
-    private static final int SUBJECTS = 200;
     private static final long DELAY = 10;
     private static final double SUBJECT_MASS = 10;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
@@ -28,6 +24,8 @@ public class SimulationField implements ActionListener {
     private static final Dimension FIELD_DIMENSION = new Dimension(BOUNDS[0], BOUNDS[1]);
     private static final Random random = new Random();
     private Set<SimulationEventListener> listeners;
+    private int subjectCount = 200;
+    private ArrayList<int[]> timeData;
     private Subject[] subjects;
     private int timeIndex;
     private boolean paused = false;
@@ -47,17 +45,18 @@ public class SimulationField implements ActionListener {
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
     public SimulationField() {
-        this.subjects =  new Subject[SUBJECTS];
+        this.subjects =  new Subject[subjectCount];
         listeners = new HashSet<>();
+        timeData = new ArrayList<>();
     }
 
     public void init() {
         healthAnimation = new EnumMap<>(HealthStatus.class);
         healthAnimation.put(HealthStatus.SUSCEPTIBLE, new RadiatingDot(Color.BLUE, 4, 4, 1, 1));
         healthAnimation.put(HealthStatus.INFECTED, new RadiatingDot(Color.RED, 4, infectionRadius, 1, 60));
-        healthAnimation.put(HealthStatus.RECOVERED, new RadiatingDot(Color.GRAY, 4, 4, 1, 1));
+        healthAnimation.put(HealthStatus.REMOVED, new RadiatingDot(Color.GRAY, 4, 4, 1, 1));
 
-        for(int i = 0; i < SUBJECTS; i++) {
+        for(int i = 0; i < subjectCount; i++) {
             Subject s = createRandomSubject();
             s.setEventTime(i);
             subjects[i] = s;
@@ -124,6 +123,7 @@ public class SimulationField implements ActionListener {
         }
         updateSubjects();
         simulateTransmission();
+        doStatistics();
         publishEvent();
         timeIndex++;
     }
@@ -156,7 +156,7 @@ public class SimulationField implements ActionListener {
         for(Subject s : subjects) {
             s.update(randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR);
             if(s.isTimeToChange(timeIndex)) {
-                s.updateHealth(HealthStatus.RECOVERED, timeIndex, -1);
+                s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
         }
     }
@@ -200,5 +200,21 @@ public class SimulationField implements ActionListener {
         } else if (StatusBar.TEXT_DESTINATION_ON.equals(e.getActionCommand())) {
             destinationOn = !destinationOn;
         }
+    }
+
+    public void doStatistics() {
+        int[] data = new int[HealthStatus.values().length];
+        for(Subject s : subjects) {
+            data[s.getStatus().ordinal()]++;
+        }
+        timeData.add(data);
+    }
+
+    public ArrayList<int[]> getTimeData() {
+        return timeData;
+    }
+
+    public int getSubjectCount() {
+        return subjectCount;
     }
 }
