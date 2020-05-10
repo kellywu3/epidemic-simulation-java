@@ -1,6 +1,7 @@
 package kelly;
 
 import kelly.simulation.ui.SIRChart;
+import kelly.simulation.ui.SIRPanel;
 import kelly.simulation.ui.SimulationDisplay;
 import kelly.simulation.ui.StatusPanel;
 import kelly.simulation.domain.SimulationField;
@@ -16,7 +17,7 @@ public class App
 {
     private SimulationField field;
 
-    public App() throws InterruptedException {
+    public App() {
         field = new SimulationField();
 
         JFrame jf = new JFrame("Epidemic Simulation");
@@ -26,12 +27,13 @@ public class App
 
         jf.add(new StatusPanel(field), BorderLayout.SOUTH);
 
-        SIRChart sir = new SIRChart(field);
-//        JPanel informationFrame = new JPanel();
-//        informationFrame.setLayout(new BorderLayout());
-//        informationFrame.add(sir, BorderLayout.NORTH);
-//        jf.add(informationFrame, BorderLayout.WEST);
-        jf.add(sir, BorderLayout.WEST);
+        SIRChart sirChart = new SIRChart(field);
+        SIRPanel sirPanel = new SIRPanel(field);
+        JPanel informationPanel = new JPanel();
+        informationPanel.setLayout(new BorderLayout());
+        informationPanel.add(sirPanel, BorderLayout.NORTH);
+        informationPanel.add(sirChart, BorderLayout.CENTER);
+        jf.add(informationPanel, BorderLayout.WEST);
 
         jf.pack();
         jf.setVisible(true);

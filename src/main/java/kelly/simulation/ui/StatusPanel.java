@@ -50,7 +50,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
     public void onSimulationEvent() {
         NumberFormat nf = NumberFormat.getNumberInstance();
         timeValue.setText(nf.format(field.getTimeIndex()) +
-            (field.getEradicatedTime() < 0 ? "" : " Eradicated at: " + field.getEradicatedTime())
+            (field.getEradicatedTime() < 0 ? "" : " Eradicated at: " + nf.format(field.getEradicatedTime()))
         );
     }
 
@@ -72,7 +72,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
             field.setPaused(false);
             pauseButton.setText(TEXT_PAUSE);
         } else if(TEXT_RESTART.equals(e.getActionCommand())) {
-            field.isRestarting(true);
+            field.setRestarting(true);
         } else if (TEXT_DESTINATION_ON.equals(e.getActionCommand())) {
             field.setDestinationOn(true);
             enableDestination.setText(TEXT_DESTINATION_OFF);

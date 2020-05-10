@@ -43,17 +43,7 @@ public class SIRChart extends JComponent implements SimulationEventListener {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
-    }
-
-    @Override
-    public Dimension getMinimumSize() {
-        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
-    }
-
-    @Override
-    public Dimension getMaximumSize() {
-        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
+        return new Dimension(simulationField.getWidth() / 2, simulationField.getHeight() / 2);
     }
 
     @Override

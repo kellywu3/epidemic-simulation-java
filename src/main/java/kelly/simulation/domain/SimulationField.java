@@ -44,6 +44,7 @@ public class SimulationField {
     private int minInfectionTime = 7;
     private int maxInfectionTime = 21;
     private int timeScale = 72;
+    public int maxInfected = 0;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
@@ -68,6 +69,7 @@ public class SimulationField {
         }
         timeIndex = subjects.length + 1;
         eradicatedTime = -1;
+        maxInfected = 0;
     }
 
     private int randomDuration() {
@@ -205,6 +207,9 @@ public class SimulationField {
         if(data[HealthStatus.INFECTED.ordinal()]== 0) {
             eradicatedTime = getTimeIndex();
         }
+        if(data[HealthStatus.INFECTED.ordinal()] > maxInfected) {
+            maxInfected = data[HealthStatus.INFECTED.ordinal()];
+        }
     }
 
     public ArrayList<int[]> getTimeData() {
@@ -235,7 +240,11 @@ public class SimulationField {
         this.paused = paused;
     }
 
-    public void isRestarting(boolean restarting) {
+    public boolean isRestarting() {
+        return restarting;
+    }
+
+    public void setRestarting(boolean restarting) {
         this.restarting = restarting;
     }
 
@@ -245,5 +254,9 @@ public class SimulationField {
 
     public void setDestinationOn(boolean destinationOn) {
         this.destinationOn = destinationOn;
+    }
+
+    public int getMaxInfected() {
+        return maxInfected;
     }
 }
