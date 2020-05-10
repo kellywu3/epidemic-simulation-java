@@ -2,7 +2,7 @@ package kelly;
 
 import kelly.simulation.ui.SIRChart;
 import kelly.simulation.ui.SimulationDisplay;
-import kelly.simulation.ui.StatusBar;
+import kelly.simulation.ui.StatusPanel;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
@@ -24,9 +24,13 @@ public class App
         SimulationDisplay sp = new SimulationDisplay(field);
         jf.add(sp, BorderLayout.CENTER);
 
-        jf.add(new StatusBar(field), BorderLayout.SOUTH);
+        jf.add(new StatusPanel(field), BorderLayout.SOUTH);
 
         SIRChart sir = new SIRChart(field);
+//        JPanel informationFrame = new JPanel();
+//        informationFrame.setLayout(new BorderLayout());
+//        informationFrame.add(sir, BorderLayout.NORTH);
+//        jf.add(informationFrame, BorderLayout.WEST);
         jf.add(sir, BorderLayout.WEST);
 
         jf.pack();

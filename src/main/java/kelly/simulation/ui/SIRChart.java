@@ -29,18 +29,31 @@ public class SIRChart extends JComponent implements SimulationEventListener {
             int x = i * getWidth() / dataSize;
             int yp = 0;
             int y;
-            for (int j=0; j<rec.length; j++) {
+            int j;
+            for (j = 0; j<rec.length - 1; j++) {
                 y = rec[j] * getHeight() / simulationField.getSubjectCount() + yp;
                 g.setColor(DATACOLORS[j]);
                 g.drawLine(x, yp, x, y);
                 yp = y;
             }
+            g.setColor(DATACOLORS[j]);
+            g.drawLine(x, yp, x, getHeight());
         }
     }
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(100, 100);
+        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(simulationField.getWidth(), simulationField.getHeight() / 2);
     }
 
     @Override

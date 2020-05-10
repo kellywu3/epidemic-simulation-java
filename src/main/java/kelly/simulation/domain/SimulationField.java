@@ -1,7 +1,7 @@
 package kelly.simulation.domain;
 
 import kelly.simulation.MatrixUtil;
-import kelly.simulation.ui.StatusBar;
+import kelly.simulation.ui.StatusPanel;
 import kelly.simulation.things.Animatable;
 import kelly.simulation.things.RadiatingDot;
 
@@ -11,15 +11,17 @@ import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.util.*;
 
-public class SimulationField implements ActionListener {
+public class SimulationField {
     private static final long DELAY = 10;
-    private static final double SUBJECT_MASS = 10;
+    private static final double SUBJECT_MASS = 15;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
     private static final int[] BOUNDS = new int[] {640, 480};
     private static final double ODDS_INITIAL_SICK = 0.02;
     private static final double MAX_RANDOM_FORCE = 2;
     public static final double FRICTION_FACTOR = 0.99;
     public static final double DESTINATION_FORCE_FACTOR = 2;
+    public static final int MIN_STAY_TIME = 36;
+    public static final int MAX_STAY_TIME = 48;
 
     private static final Dimension FIELD_DIMENSION = new Dimension(BOUNDS[0], BOUNDS[1]);
     private static final Random random = new Random();
@@ -30,6 +32,7 @@ public class SimulationField implements ActionListener {
     private int timeIndex;
     private boolean paused = false;
     private boolean restarting;
+    private int eradicatedTime;
 
     private double[] destination = new double[] {0.5 * BOUNDS[0], 0.5 * BOUNDS[1]};
 //    private double[] destination = new double[] {0, 0};
@@ -40,14 +43,13 @@ public class SimulationField implements ActionListener {
     private double oddsOfInfection = 0.2;
     private int minInfectionTime = 7;
     private int maxInfectionTime = 21;
-    private int timeScale = 24;
+    private int timeScale = 72;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
     public SimulationField() {
         this.subjects =  new Subject[subjectCount];
         listeners = new HashSet<>();
-        timeData = new ArrayList<>();
     }
 
     public void init() {
@@ -55,7 +57,7 @@ public class SimulationField implements ActionListener {
         healthAnimation.put(HealthStatus.SUSCEPTIBLE, new RadiatingDot(Color.BLUE, 4, 4, 1, 1));
         healthAnimation.put(HealthStatus.INFECTED, new RadiatingDot(Color.RED, 4, infectionRadius, 1, 60));
         healthAnimation.put(HealthStatus.REMOVED, new RadiatingDot(Color.GRAY, 4, 4, 1, 1));
-
+        timeData = new ArrayList<>();
         for(int i = 0; i < subjectCount; i++) {
             Subject s = createRandomSubject();
             s.setEventTime(i);
@@ -64,8 +66,8 @@ public class SimulationField implements ActionListener {
                 s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
             }
         }
-
         timeIndex = subjects.length + 1;
+        eradicatedTime = -1;
     }
 
     private int randomDuration() {
@@ -123,7 +125,10 @@ public class SimulationField implements ActionListener {
         }
         updateSubjects();
         simulateTransmission();
-        doStatistics();
+        if(eradicatedTime <= 0) {
+            doStatistics();
+
+        }
         publishEvent();
         timeIndex++;
     }
@@ -148,13 +153,14 @@ public class SimulationField implements ActionListener {
     private void assignDestination() {
         if (random.nextDouble() < oddsOfDestination) {
             int s = random.nextInt(subjects.length);
-            subjects[s].assignDestination(destination, false);
+            int returnTime = timeIndex + MIN_STAY_TIME + random.nextInt(MAX_STAY_TIME - MIN_STAY_TIME);
+            subjects[s].assignDestination(destination, returnTime);
         }
     }
 
     private void updateSubjects() {
         for(Subject s : subjects) {
-            s.update(randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR);
+            s.update(randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR, timeIndex);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
@@ -190,24 +196,15 @@ public class SimulationField implements ActionListener {
         return timeIndex;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-//        System.out.println(e);
-        if(StatusBar.TEXT_PAUSE.equals(e.getActionCommand())) {
-            paused = !paused;
-        } else if(StatusBar.TEXT_RESTART.equals(e.getActionCommand())) {
-            restarting = true;
-        } else if (StatusBar.TEXT_DESTINATION_ON.equals(e.getActionCommand())) {
-            destinationOn = !destinationOn;
-        }
-    }
-
     public void doStatistics() {
         int[] data = new int[HealthStatus.values().length];
         for(Subject s : subjects) {
             data[s.getStatus().ordinal()]++;
         }
         timeData.add(data);
+        if(data[HealthStatus.INFECTED.ordinal()]== 0) {
+            eradicatedTime = getTimeIndex();
+        }
     }
 
     public ArrayList<int[]> getTimeData() {
@@ -216,5 +213,37 @@ public class SimulationField implements ActionListener {
 
     public int getSubjectCount() {
         return subjectCount;
+    }
+
+    public int getEradicatedTime() {
+        return eradicatedTime;
+    }
+
+    public int getHeight() {
+        return BOUNDS[1];
+    }
+
+    public int getWidth() {
+        return BOUNDS[0];
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    public void isRestarting(boolean restarting) {
+        this.restarting = restarting;
+    }
+
+    public boolean isDestinationOn() {
+        return destinationOn;
+    }
+
+    public void setDestinationOn(boolean destinationOn) {
+        this.destinationOn = destinationOn;
     }
 }

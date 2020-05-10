@@ -5,7 +5,6 @@ import kelly.simulation.MatrixUtil;
 public class Subject {
     private double[] position;
     private double[] velocity;
-
     private double[] destination;
     private double[] oldLocation;
 
@@ -13,6 +12,7 @@ public class Subject {
     private HealthStatus status = HealthStatus.SUSCEPTIBLE;
     private int eventTime;
     private int timeToChange = -1;
+    private int returnTime = -1;
 
     public Subject(double[] position, double[] velocity, double mass) {
         this.position = position;
@@ -30,9 +30,13 @@ public class Subject {
         return timeToChange >= 0 && timeIndex > timeToChange;
     }
 
-    public void update(double[] force, int[] bound, int dt, double forceFactor) {
+    public void update(double[] force, int[] bound, int dt, double forceFactor, int timeIndex) {
         if(destination != null) {
             applyDestinationForce(forceFactor, force);
+        } else if(returnTime >= 0 && returnTime < timeIndex) {
+            destination = oldLocation;
+            oldLocation = null;
+            returnTime = -1;
         }
         for(int i = 0; i < force.length; i++) {
             double a = force[i] / mass;
@@ -65,10 +69,11 @@ public class Subject {
         return position;
     }
 
-    public void assignDestination(double[] destination, boolean saveLocation) {
+    public void assignDestination(double[] destination, int returnTime) {
         this.destination = destination;
-        if(saveLocation) {
+        if(returnTime >= 0) {
             this.oldLocation = MatrixUtil.clone(position);
+            this.returnTime = returnTime;
         }
     }
 
