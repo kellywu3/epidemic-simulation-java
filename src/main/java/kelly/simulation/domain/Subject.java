@@ -8,16 +8,14 @@ public class Subject {
     private double[] destination;
     private double[] oldLocation;
 
-    private double mass;
     private HealthStatus status = HealthStatus.SUSCEPTIBLE;
     private int eventTime;
     private int timeToChange = -1;
     private int returnTime = -1;
 
-    public Subject(double[] position, double[] velocity, double mass) {
+    public Subject(double[] position, double[] velocity) {
         this.position = position;
         this.velocity = velocity;
-        this.mass = mass;
     }
 
     public void updateHealth(HealthStatus status, int timeIndex, int duration) {
@@ -30,7 +28,7 @@ public class Subject {
         return timeToChange >= 0 && timeIndex > timeToChange;
     }
 
-    public void update(double[] force, int[] bound, int dt, double forceFactor, int timeIndex) {
+    public void update(double mass, double[] force, int[] bound, int dt, double forceFactor, int timeIndex) {
         if(destination != null) {
             applyDestinationForce(forceFactor, force);
         } else if(returnTime >= 0 && returnTime < timeIndex) {

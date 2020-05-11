@@ -1,12 +1,10 @@
 package kelly;
 
-import kelly.simulation.ui.SIRChart;
-import kelly.simulation.ui.SIRPanel;
-import kelly.simulation.ui.SimulationDisplay;
-import kelly.simulation.ui.StatusPanel;
+import kelly.simulation.ui.*;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 /**
@@ -21,7 +19,6 @@ public class App
         field = new SimulationField();
 
         JFrame jf = new JFrame("Epidemic Simulation");
-        jf.getContentPane().setLayout(new BorderLayout());
         SimulationDisplay sp = new SimulationDisplay(field);
         jf.add(sp, BorderLayout.CENTER);
 
@@ -29,10 +26,12 @@ public class App
 
         SIRChart sirChart = new SIRChart(field);
         SIRPanel sirPanel = new SIRPanel(field);
+        SimulationControlPanel scp = new SimulationControlPanel(field);
         JPanel informationPanel = new JPanel();
         informationPanel.setLayout(new BorderLayout());
         informationPanel.add(sirPanel, BorderLayout.NORTH);
         informationPanel.add(sirChart, BorderLayout.CENTER);
+        informationPanel.add(scp, BorderLayout.SOUTH);
         jf.add(informationPanel, BorderLayout.WEST);
 
         jf.pack();

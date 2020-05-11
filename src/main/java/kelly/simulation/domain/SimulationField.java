@@ -1,32 +1,29 @@
 package kelly.simulation.domain;
 
 import kelly.simulation.MatrixUtil;
-import kelly.simulation.ui.StatusPanel;
 import kelly.simulation.things.Animatable;
 import kelly.simulation.things.RadiatingDot;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.util.*;
 
 public class SimulationField {
     private static final long DELAY = 10;
-    private static final double SUBJECT_MASS = 15;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
     private static final int[] BOUNDS = new int[] {640, 480};
     private static final double ODDS_INITIAL_SICK = 0.02;
     private static final double MAX_RANDOM_FORCE = 2;
-    public static final double FRICTION_FACTOR = 0.99;
-    public static final double DESTINATION_FORCE_FACTOR = 2;
+    public static final double FRICTION_FACTOR = 0.98;
+    public static final double DESTINATION_FORCE_FACTOR = 1;
     public static final int MIN_STAY_TIME = 36;
-    public static final int MAX_STAY_TIME = 48;
+    public static final int MAX_STAY_TIME = 72;
 
     private static final Dimension FIELD_DIMENSION = new Dimension(BOUNDS[0], BOUNDS[1]);
     private static final Random random = new Random();
     private Set<SimulationEventListener> listeners;
     private int subjectCount = 200;
+    private double subjectMass = 10;
     private ArrayList<int[]> timeData;
     private Subject[] subjects;
     private int timeIndex;
@@ -49,7 +46,6 @@ public class SimulationField {
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
     public SimulationField() {
-        this.subjects =  new Subject[subjectCount];
         listeners = new HashSet<>();
     }
 
@@ -59,6 +55,7 @@ public class SimulationField {
         healthAnimation.put(HealthStatus.INFECTED, new RadiatingDot(Color.RED, 4, infectionRadius, 1, 60));
         healthAnimation.put(HealthStatus.REMOVED, new RadiatingDot(Color.GRAY, 4, 4, 1, 1));
         timeData = new ArrayList<>();
+        this.subjects =  new Subject[subjectCount];
         for(int i = 0; i < subjectCount; i++) {
             Subject s = createRandomSubject();
             s.setEventTime(i);
@@ -121,7 +118,7 @@ public class SimulationField {
         }
     }
 
-    private void doSimulation() {
+    private synchronized void doSimulation() {
         if(destinationOn) {
             assignDestination();
         }
@@ -162,7 +159,7 @@ public class SimulationField {
 
     private void updateSubjects() {
         for(Subject s : subjects) {
-            s.update(randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR, timeIndex);
+            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR, timeIndex);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
@@ -187,7 +184,7 @@ public class SimulationField {
     }
 
     private Subject createRandomSubject() {
-        return new Subject(randomPosition(), randomVector(SUBJECT_INITIAL_MAX_VELOCITY), SUBJECT_MASS);
+        return new Subject(randomPosition(), randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
     }
 
     public Dimension getFieldDimension() {
@@ -259,4 +256,19 @@ public class SimulationField {
     public int getMaxInfected() {
         return maxInfected;
     }
+
+    public synchronized void updateSubjectCount(int subjects) {
+        subjectCount = subjects;
+        init();
+    }
+
+    public void setSubjectMass(double subjectMass) {
+        this.subjectMass = subjectMass;
+    }
+
+    public double getSubjectMass() {
+        return subjectMass;
+    }
+
+
 }

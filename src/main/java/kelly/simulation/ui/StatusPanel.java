@@ -7,19 +7,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.NumberFormat;
 
 public class StatusPanel extends JPanel implements SimulationEventListener, ActionListener {
+    private static final int WIDTH = 64;
     public static final String TEXT_DESTINATION_ON = "Turn Destination On";
     public static final String TEXT_DESTINATION_OFF = "Turn Destination Off";
     public static final String TEXT_PAUSE = "Pause";
     public static final String TEXT_PLAY = "Play";
     public static final String TEXT_RESTART = "Restart";
+    private JLabel timeLabel = new JLabel("Time:");
+    private JLabel eradicatedTimeLabel = new JLabel();
     private SimulationField field;
     private JButton enableDestination;
     private JButton pauseButton;
     private JButton restartButton;
-    private JLabel timeValue;
+    private NumberDisplay timeValue = new NumberDisplay(WIDTH);
+    private NumberDisplay eradicatedTime = new NumberDisplay(WIDTH);
 
     public StatusPanel(SimulationField field) {
         this.field = field;
@@ -30,15 +33,16 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         enableDestination = new JButton(TEXT_DESTINATION_ON);
         pauseButton = new JButton(TEXT_PAUSE);
         restartButton = new JButton(TEXT_RESTART);
-        timeValue = new JLabel();
+        timeValue = new NumberDisplay(WIDTH);
 
         add(enableDestination);
         add(pauseButton);
         add(restartButton);
 
-        JLabel timeLabel = new JLabel("Time:");
         add(timeLabel);
         add(timeValue);
+        add(eradicatedTimeLabel);
+        add(eradicatedTime);
         timeValue.setMinimumSize(new Dimension(500, 0));
 
         enableDestination.addActionListener(this);
@@ -48,10 +52,14 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
 
     @Override
     public void onSimulationEvent() {
-        NumberFormat nf = NumberFormat.getNumberInstance();
-        timeValue.setText(nf.format(field.getTimeIndex()) +
-            (field.getEradicatedTime() < 0 ? "" : " Eradicated at: " + nf.format(field.getEradicatedTime()))
-        );
+        timeValue.setValue(field.getTimeIndex());
+        if(field.getEradicatedTime() >= 0) {
+            eradicatedTimeLabel.setText("Eradicated At:");
+            eradicatedTime.setValue(field.getEradicatedTime());
+        } else {
+            eradicatedTimeLabel.setText(null);
+            eradicatedTime.setText(null);
+        }
     }
 
     @Override
