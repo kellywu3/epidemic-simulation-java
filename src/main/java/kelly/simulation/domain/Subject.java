@@ -28,7 +28,7 @@ public class Subject {
         return timeToChange >= 0 && timeIndex > timeToChange;
     }
 
-    public void update(double mass, double[] force, int[] bound, int dt, double forceFactor, int timeIndex) {
+    public void update(double mass, double[] force, int[] loBound, int[] hiBound, int dt, double forceFactor, int timeIndex) {
         if(destination != null) {
             applyDestinationForce(forceFactor, force);
         } else if(returnTime >= 0 && returnTime < timeIndex) {
@@ -41,8 +41,10 @@ public class Subject {
             double v = (velocity[i] + (a * dt)) * SimulationField.FRICTION_FACTOR;
             double p = position[i] + (v * dt);
 
-            if(p < 0 || p >= bound[i]) {
+            if((p <= loBound[i] && v < 0) || (p >= hiBound[i] && v > 0)) {
                 v = -v;
+                p = position[i] + (v * dt);
+            } else {
                 p = position[i] + (v * dt);
             }
 

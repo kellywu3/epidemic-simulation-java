@@ -5,23 +5,29 @@ import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class SimulationDisplay extends JComponent implements SimulationEventListener {
-    private SimulationField simulationField;
+    private SimulationField field;
 
-    public SimulationDisplay(SimulationField simulationField) {
-        this.simulationField = simulationField;
-        simulationField.addSimulationEventListener(this);
+    public SimulationDisplay(SimulationField field) {
+        JComponent self = this;
+        this.field = field;
+        field.addSimulationEventListener(this);
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                field.updateHiBound(new int[] {
+                    self.getWidth(), self.getHeight()
+                });
+            }
+        });
     }
 
     @Override
     public void paint(Graphics g) {
-        simulationField.drawSubjects(g, this);
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return simulationField.getFieldDimension();
+        field.drawSubjects(g, this);
     }
 
     @Override

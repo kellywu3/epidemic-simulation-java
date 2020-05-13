@@ -11,7 +11,6 @@ import java.util.*;
 public class SimulationField {
     private static final long DELAY = 10;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
-    private static final int[] BOUNDS = new int[] {640, 480};
     private static final double ODDS_INITIAL_SICK = 0.02;
     private static final double MAX_RANDOM_FORCE = 2;
     public static final double FRICTION_FACTOR = 0.98;
@@ -19,7 +18,6 @@ public class SimulationField {
     public static final int MIN_STAY_TIME = 36;
     public static final int MAX_STAY_TIME = 72;
 
-    private static final Dimension FIELD_DIMENSION = new Dimension(BOUNDS[0], BOUNDS[1]);
     private static final Random random = new Random();
     private Set<SimulationEventListener> listeners;
     private int subjectCount = 200;
@@ -30,9 +28,10 @@ public class SimulationField {
     private boolean paused = false;
     private boolean restarting;
     private int eradicatedTime;
+    private int[] hiBound = new int[] {640, 480};
+    private int[] loBound = new int[] {0, 0};
 
-    private double[] destination = new double[] {0.5 * BOUNDS[0], 0.5 * BOUNDS[1]};
-//    private double[] destination = new double[] {0, 0};
+    private double[] destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
     private double oddsOfDestination = 0.02;
     private boolean destinationOn = false;
 
@@ -159,7 +158,7 @@ public class SimulationField {
 
     private void updateSubjects() {
         for(Subject s : subjects) {
-            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), BOUNDS, 1, DESTINATION_FORCE_FACTOR, timeIndex);
+            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), loBound, hiBound, 1, DESTINATION_FORCE_FACTOR, timeIndex);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
@@ -175,20 +174,16 @@ public class SimulationField {
     }
 
     private double[] randomPosition() {
-        int len = BOUNDS.length;
+        int len = hiBound.length;
         double[] position = new double[len];
         for(int i = 0; i < len; i ++) {
-            position[i] = random.nextDouble() * BOUNDS[i];
+            position[i] = random.nextDouble() * hiBound[i];
         }
         return position;
     }
 
     private Subject createRandomSubject() {
         return new Subject(randomPosition(), randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
-    }
-
-    public Dimension getFieldDimension() {
-        return FIELD_DIMENSION;
     }
 
     public int getTimeIndex() {
@@ -222,11 +217,11 @@ public class SimulationField {
     }
 
     public int getHeight() {
-        return BOUNDS[1];
+        return hiBound[1];
     }
 
     public int getWidth() {
-        return BOUNDS[0];
+        return hiBound[0];
     }
 
     public boolean isPaused() {
@@ -270,5 +265,7 @@ public class SimulationField {
         return subjectMass;
     }
 
-
+    public void updateHiBound(int[] highBound) {
+        hiBound = highBound;
+    }
 }

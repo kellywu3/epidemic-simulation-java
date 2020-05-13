@@ -10,6 +10,7 @@ public class SimulationControlPanel extends JPanel {
     private SimulationField field;
     private LabeledInput numberOfSubjects;
     private LabeledInput massOfSubjects;
+    private LabeledInput boundHeight, boundWidth;
 
     public SimulationControlPanel(SimulationField field) {
         this.field = field;
@@ -35,10 +36,27 @@ public class SimulationControlPanel extends JPanel {
             }
         });
         add(massOfSubjects);
-    }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(field.getWidth() / 2, field.getHeight() / 2);
+        boundWidth = new LabeledInput("Bound Width:", 4, field.getWidth());
+        boundWidth.addActionListener(e -> {
+            int oldVal = field.getWidth();
+            try {
+                field.updateHiBound(new int[] {boundWidth.getIntValue(), boundHeight.getIntValue()});
+            } catch(NumberFormatException nfe) {
+                boundWidth.setValue(oldVal);
+            }
+        });
+        add(boundWidth);
+
+        boundHeight = new LabeledInput("Bound Height:", 4, field.getHeight());
+        boundHeight.addActionListener(e -> {
+            int oldVal = field.getHeight();
+            try {
+                field.updateHiBound(new int[] {boundWidth.getIntValue(), boundHeight.getIntValue()});
+            } catch(NumberFormatException nfe) {
+                boundHeight.setValue(oldVal);
+            }
+        });
+        add(boundHeight);
     }
 }
