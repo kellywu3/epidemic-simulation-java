@@ -1,7 +1,6 @@
 package kelly.simulation.ui;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class LabeledInput extends JPanel {
@@ -23,10 +22,6 @@ public class LabeledInput extends JPanel {
         add(value);
     }
 
-    public boolean isEventFromThis(ActionEvent e) {
-        return value.equals(e.getSource());
-    }
-
     public void addActionListener(ActionListener l) {
         value.addActionListener(l);
     }
@@ -37,5 +32,13 @@ public class LabeledInput extends JPanel {
 
     public double getDoubleValue() {
         return Double.parseDouble(value.getText());
+    }
+
+    public void setValue(int val) {
+        value.setText(Integer.toString(val));
+    }
+
+    public void setValue(double val) {
+        value.setText(Double.toString(val));
     }
 }
