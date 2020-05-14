@@ -16,11 +16,13 @@ public class SimulationControlPanel extends JPanel {
     private LabeledInput infectionRadius;
     private LabeledInput minInfectionTime, maxInfectionTime;
     private LabeledInput minDestinationStayTime, maxDestinationStayTime;
+    private LabeledInput frictionFactor;
 
     public SimulationControlPanel(SimulationField field) {
         BoxLayout bl = new BoxLayout(this, BoxLayout.PAGE_AXIS);
         setLayout(bl);
         numberOfSubjects = new LabeledInput("Number of Subjects:" , CHAR_COUNT, field.getSubjectCount());
+        numberOfSubjects.setAlignmentX(SwingConstants.RIGHT);
         numberOfSubjects.addActionListener(e -> {
             int oldVal = field.getSubjectCount();
             try {
@@ -33,6 +35,7 @@ public class SimulationControlPanel extends JPanel {
         add(numberOfSubjects);
 
         infectionRadius = new LabeledInput("Infection Radius:" , CHAR_COUNT, field.getInfectionRadius());
+        infectionRadius.setAlignmentX(SwingConstants.RIGHT);
         infectionRadius.addActionListener(e -> {
             int oldVal = field.getInfectionRadius();
             try {
@@ -45,6 +48,7 @@ public class SimulationControlPanel extends JPanel {
         add(infectionRadius);
 
         massOfSubjects = new LabeledInput("Mass of Subjects:" , CHAR_COUNT, field.getSubjectMass());
+        massOfSubjects.setAlignmentX(SwingConstants.RIGHT);
         massOfSubjects.addActionListener(e -> {
             double oldVal = field.getSubjectMass();
             try {
@@ -56,6 +60,7 @@ public class SimulationControlPanel extends JPanel {
         add(massOfSubjects);
 
         boundWidth = new LabeledInput("Bound Width:", CHAR_COUNT, field.getWidth());
+        boundWidth.setAlignmentX(SwingConstants.RIGHT);
         boundWidth.addActionListener(e -> {
             int oldVal = field.getWidth();
             try {
@@ -67,6 +72,7 @@ public class SimulationControlPanel extends JPanel {
         add(boundWidth);
 
         boundHeight = new LabeledInput("Bound Height:", CHAR_COUNT, field.getHeight());
+        boundHeight.setAlignmentX(SwingConstants.RIGHT);
         boundHeight.addActionListener(e -> {
             int oldVal = field.getHeight();
             try {
@@ -78,6 +84,7 @@ public class SimulationControlPanel extends JPanel {
         add(boundHeight);
 
         oddsOfInitialSick = new LabeledInput("Odds of initial infection:" , CHAR_COUNT, field.getOddsInitialSick());
+        oddsOfInitialSick.setAlignmentX(SwingConstants.RIGHT);
         oddsOfInitialSick.addActionListener(e -> {
             double oldVal = field.getOddsInitialSick();
             try {
@@ -89,6 +96,7 @@ public class SimulationControlPanel extends JPanel {
         add(oddsOfInitialSick);
 
         oddsOfDestination = new LabeledInput("Odds of Traveling to Destination:" , CHAR_COUNT, field.getOddsOfDestination());
+        oddsOfDestination.setAlignmentX(SwingConstants.RIGHT);
         oddsOfDestination.addActionListener(e -> {
             double oldVal = field.getOddsOfDestination();
             try {
@@ -100,6 +108,7 @@ public class SimulationControlPanel extends JPanel {
         add(oddsOfDestination);
 
         destinationX = new LabeledInput("X-Coordinate Destination:", CHAR_COUNT, field.getDestinationX());
+        destinationX.setAlignmentX(SwingConstants.RIGHT);
         destinationX.addActionListener(e -> {
             double oldVal = field.getDestinationX();
             try {
@@ -111,6 +120,7 @@ public class SimulationControlPanel extends JPanel {
         add(destinationX);
 
         destinationY = new LabeledInput("Y-Coordinate Destination:", CHAR_COUNT, field.getDestinationY());
+        destinationY.setAlignmentX(SwingConstants.RIGHT);
         destinationY.addActionListener(e -> {
             double oldVal = field.getDestinationY();
             try {
@@ -122,6 +132,7 @@ public class SimulationControlPanel extends JPanel {
         add(destinationY);
 
         oddsOfInfection = new LabeledInput("Odds of Infection:" , CHAR_COUNT, field.getOddsOfInfection());
+        oddsOfInfection.setAlignmentX(SwingConstants.RIGHT);
         oddsOfInfection.addActionListener(e -> {
             double oldVal = field.getOddsOfInfection();
             try {
@@ -133,6 +144,7 @@ public class SimulationControlPanel extends JPanel {
         add(oddsOfInfection);
 
         minInfectionTime = new LabeledInput("Minimum Infection Time:" , CHAR_COUNT, field.getMinInfectionTime());
+        minInfectionTime.setAlignmentX(SwingConstants.RIGHT);
         minInfectionTime.addActionListener(e -> {
             int oldVal = field.getMinInfectionTime();
             try {
@@ -144,6 +156,7 @@ public class SimulationControlPanel extends JPanel {
         add(minInfectionTime);
 
         maxInfectionTime = new LabeledInput("Maximum Infection Time:" , CHAR_COUNT, field.getMaxInfectionTime());
+        maxInfectionTime.setAlignmentX(SwingConstants.RIGHT);
         maxInfectionTime.addActionListener(e -> {
             int oldVal = field.getMaxInfectionTime();
             try {
@@ -155,6 +168,7 @@ public class SimulationControlPanel extends JPanel {
         add(maxInfectionTime);
 
         minDestinationStayTime = new LabeledInput("Minimum Destination Stay Time:" , CHAR_COUNT, field.getMinStayTime());
+        minDestinationStayTime.setAlignmentX(SwingConstants.RIGHT);
         minDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMinStayTime();
             try {
@@ -166,6 +180,7 @@ public class SimulationControlPanel extends JPanel {
         add(minDestinationStayTime);
 
         maxDestinationStayTime = new LabeledInput("Maximum Destination Stay Time:" , CHAR_COUNT, field.getMaxStayTime());
+        maxDestinationStayTime.setAlignmentX(SwingConstants.RIGHT);
         maxDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMaxStayTime();
             try {
@@ -175,5 +190,17 @@ public class SimulationControlPanel extends JPanel {
             }
         });
         add(maxDestinationStayTime);
+
+        frictionFactor = new LabeledInput("Friction Factor:" , CHAR_COUNT, field.getFrictionFactor());
+        frictionFactor.setAlignmentX(SwingConstants.RIGHT);
+        frictionFactor.addActionListener(e -> {
+            double oldVal = field.getFrictionFactor();
+            try {
+                field.setFrictionFactor(frictionFactor.getDoubleValue());
+            } catch(NumberFormatException nfe) {
+                frictionFactor.setValue(oldVal);
+            }
+        });
+        add(frictionFactor);
     }
 }

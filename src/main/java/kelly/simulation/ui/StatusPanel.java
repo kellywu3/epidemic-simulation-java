@@ -15,12 +15,14 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
     public static final String TEXT_PAUSE = "Pause";
     public static final String TEXT_PLAY = "Play";
     public static final String TEXT_RESTART = "Restart";
+    public static final String TEXT_RESET_VALUES = "Reset Values";
     private JLabel timeLabel = new JLabel("Time:");
     private JLabel eradicatedTimeLabel = new JLabel();
     private SimulationField field;
     private JButton enableDestination;
     private JButton pauseButton;
     private JButton restartButton;
+    private JButton resetValuesButton;
     private NumberDisplay timeValue = new NumberDisplay(WIDTH);
     private NumberDisplay eradicatedTime = new NumberDisplay(WIDTH);
 
@@ -33,11 +35,13 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         enableDestination = new JButton(TEXT_DESTINATION_ON);
         pauseButton = new JButton(TEXT_PAUSE);
         restartButton = new JButton(TEXT_RESTART);
+        resetValuesButton = new JButton(TEXT_RESET_VALUES);
         timeValue = new NumberDisplay(WIDTH);
 
         add(enableDestination);
         add(pauseButton);
         add(restartButton);
+        add(resetValuesButton);
 
         add(timeLabel);
         add(timeValue);
@@ -48,6 +52,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         enableDestination.addActionListener(this);
         pauseButton.addActionListener(this);
         restartButton.addActionListener(this);
+        resetValuesButton.addActionListener(this);
     }
 
     @Override
@@ -87,6 +92,8 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         } else if (TEXT_DESTINATION_OFF.equals(e.getActionCommand())) {
             field.setDestinationOn(false);
             enableDestination.setText(TEXT_DESTINATION_ON);
+        } else if(TEXT_RESET_VALUES.equals(e.getActionCommand())) {
+            field.initValues();
         }
     }
 }

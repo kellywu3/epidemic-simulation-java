@@ -12,38 +12,40 @@ public class SimulationField {
     private static final long DELAY = 10;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
     private static final double MAX_RANDOM_FORCE = 2;
-    public static final double FRICTION_FACTOR = 0.98;
     public static final double DESTINATION_FORCE_FACTOR = 1;
 
     private static final Random random = new Random();
     private Set<SimulationEventListener> listeners;
-    private int subjectCount = 200;
-    private double subjectMass = 10;
     private ArrayList<int[]> timeData;
-    private Subject[] subjects;
     private int timeIndex;
+    private Subject[] subjects;
     private boolean paused = false;
+    private boolean destinationOn = false;
+    private int subjectCount;
+    private double subjectMass;
+    public double frictionFactor;
     private boolean restarting;
     private int eradicatedTime;
-    private int[] hiBound = new int[] {640, 480};
-    private int[] loBound = new int[] {0, 0};
-    private double[] destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
-    private double oddsOfDestination = 0.02;
-    private double oddsInitialSick = 0.02;
-    private boolean destinationOn = false;
-    private int infectionRadius = 30;
-    private double oddsOfInfection = 0.2;
-    private int minInfectionTime = 7;
-    private int maxInfectionTime = 21;
-    private int timeScale = 72;
-    private int maxInfected = 0;
-    private int minStayTime = 36;
-    private int maxStayTime = 72;
+    private int[] hiBound;
+    private int[] loBound;
+    private double[] destination;
+    private double oddsOfDestination;
+    private double oddsInitialSick;
+    private int infectionRadius;
+    private double oddsOfInfection;
+    private int minInfectionTime;
+    private int maxInfectionTime;
+    private int timeScale;
+    private int maxInfected;
+    private int minStayTime;
+    private int maxStayTime;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
     public SimulationField() {
         listeners = new HashSet<>();
+        init();
+        initValues();
     }
 
     public void init() {
@@ -64,6 +66,25 @@ public class SimulationField {
         timeIndex = subjects.length + 1;
         eradicatedTime = -1;
         maxInfected = 0;
+    }
+
+    public void initValues() {
+        subjectCount = 200;
+        subjectMass = 10;
+        frictionFactor = 0.98;
+        hiBound = new int[] {640, 480};
+        loBound = new int[] {0, 0};
+        destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
+        oddsOfDestination = 0.02;
+        oddsInitialSick = 0.02;
+        infectionRadius = 30;
+        oddsOfInfection = 0.2;
+        minInfectionTime = 7;
+        maxInfectionTime = 21;
+        timeScale = 72;
+        maxInfected = 0;
+        minStayTime = 36;
+        maxStayTime = 72;
     }
 
     private int randomDuration() {
@@ -156,7 +177,7 @@ public class SimulationField {
 
     private void updateSubjects() {
         for(Subject s : subjects) {
-            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), loBound, hiBound, 1, DESTINATION_FORCE_FACTOR, timeIndex);
+            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), loBound, hiBound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
@@ -220,10 +241,6 @@ public class SimulationField {
 
     public int getWidth() {
         return hiBound[0];
-    }
-
-    public boolean isPaused() {
-        return paused;
     }
 
     public void setPaused(boolean paused) {
@@ -335,5 +352,13 @@ public class SimulationField {
 
     public void setMaxStayTime(int maxStayTime) {
         this.maxStayTime = maxStayTime;
+    }
+
+    public double getFrictionFactor() {
+        return frictionFactor;
+    }
+
+    public void setFrictionFactor(double frictionFactor) {
+        this.frictionFactor = frictionFactor;
     }
 }
