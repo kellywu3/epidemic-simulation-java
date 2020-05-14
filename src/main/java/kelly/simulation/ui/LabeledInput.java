@@ -9,10 +9,12 @@ public class LabeledInput extends JPanel {
 
     public LabeledInput(String description, int inputSize, int initValue) {
         this(description, inputSize, Integer.toString(initValue));
+        value.setHorizontalAlignment(SwingConstants.RIGHT);
     }
 
     public LabeledInput(String description, int inputSize, double initValue) {
         this(description, inputSize, Double.toString(initValue));
+        value.setHorizontalAlignment(SwingConstants.RIGHT);
     }
 
     public LabeledInput(String description, int inputSize, String initValue) {

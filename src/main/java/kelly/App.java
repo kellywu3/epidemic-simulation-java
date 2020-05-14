@@ -30,14 +30,16 @@ public class App
         sirChart.setPreferredSize(new Dimension(320, 240));
         SIRPanel sirPanel = new SIRPanel(field);
         SimulationControlPanel scp = new SimulationControlPanel(field);
-        scp.setPreferredSize(new Dimension(320, 240));
+        JScrollPane jsp  = new JScrollPane(scp);
+        jsp.setPreferredSize(new Dimension(320, 240));
+        JScrollBar jsb = new JScrollBar(JScrollBar.VERTICAL);
+        jsp.add(jsb);
         JPanel informationPanel = new JPanel();
         informationPanel.setLayout(new BorderLayout());
         informationPanel.add(sirPanel, BorderLayout.NORTH);
         informationPanel.add(sirChart, BorderLayout.CENTER);
-        informationPanel.add(scp, BorderLayout.SOUTH);
+        informationPanel.add(jsp, BorderLayout.SOUTH);
         jf.add(informationPanel, BorderLayout.WEST);
-
         jf.pack();
         jf.setVisible(true);
         jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

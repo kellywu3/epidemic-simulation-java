@@ -11,12 +11,9 @@ import java.util.*;
 public class SimulationField {
     private static final long DELAY = 10;
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
-    private static final double ODDS_INITIAL_SICK = 0.02;
     private static final double MAX_RANDOM_FORCE = 2;
     public static final double FRICTION_FACTOR = 0.98;
     public static final double DESTINATION_FORCE_FACTOR = 1;
-    public static final int MIN_STAY_TIME = 36;
-    public static final int MAX_STAY_TIME = 72;
 
     private static final Random random = new Random();
     private Set<SimulationEventListener> listeners;
@@ -30,17 +27,18 @@ public class SimulationField {
     private int eradicatedTime;
     private int[] hiBound = new int[] {640, 480};
     private int[] loBound = new int[] {0, 0};
-
     private double[] destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
     private double oddsOfDestination = 0.02;
+    private double oddsInitialSick = 0.02;
     private boolean destinationOn = false;
-
-    public int infectionRadius = 30;
+    private int infectionRadius = 30;
     private double oddsOfInfection = 0.2;
     private int minInfectionTime = 7;
     private int maxInfectionTime = 21;
     private int timeScale = 72;
-    public int maxInfected = 0;
+    private int maxInfected = 0;
+    private int minStayTime = 36;
+    private int maxStayTime = 72;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
@@ -59,7 +57,7 @@ public class SimulationField {
             Subject s = createRandomSubject();
             s.setEventTime(i);
             subjects[i] = s;
-            if (random.nextDouble() < ODDS_INITIAL_SICK) {
+            if (random.nextDouble() < oddsInitialSick) {
                 s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
             }
         }
@@ -151,7 +149,7 @@ public class SimulationField {
     private void assignDestination() {
         if (random.nextDouble() < oddsOfDestination) {
             int s = random.nextInt(subjects.length);
-            int returnTime = timeIndex + MIN_STAY_TIME + random.nextInt(MAX_STAY_TIME - MIN_STAY_TIME);
+            int returnTime = timeIndex + minStayTime + random.nextInt(maxStayTime - minStayTime);
             subjects[s].assignDestination(destination, returnTime);
         }
     }
@@ -232,16 +230,8 @@ public class SimulationField {
         this.paused = paused;
     }
 
-    public boolean isRestarting() {
-        return restarting;
-    }
-
     public void setRestarting(boolean restarting) {
         this.restarting = restarting;
-    }
-
-    public boolean isDestinationOn() {
-        return destinationOn;
     }
 
     public void setDestinationOn(boolean destinationOn) {
@@ -257,15 +247,93 @@ public class SimulationField {
         init();
     }
 
-    public void setSubjectMass(double subjectMass) {
-        this.subjectMass = subjectMass;
-    }
-
     public double getSubjectMass() {
         return subjectMass;
     }
 
+    public void setSubjectMass(double subjectMass) {
+        this.subjectMass = subjectMass;
+    }
+
     public void updateHiBound(int[] highBound) {
         hiBound = highBound;
+    }
+
+    public double getOddsInitialSick() {
+        return oddsInitialSick;
+    }
+
+    public synchronized void updateOddsInitialSick(double oddsInitialSick) {
+        this.oddsInitialSick = oddsInitialSick;
+        init();
+    }
+
+    public double getDestinationX() {
+        return destination[0];
+    }
+
+    public double getDestinationY() {
+        return destination[1];
+    }
+
+    public void setDestination(double[] destination) {
+        this.destination = destination;
+    }
+
+    public double getOddsOfDestination() {
+        return oddsOfDestination;
+    }
+
+    public void setOddsOfDestination(double oddsOfDestination) {
+        this.oddsOfDestination = oddsOfDestination;
+    }
+
+    public double getOddsOfInfection() {
+        return oddsOfInfection;
+    }
+
+    public void setOddsOfInfection(double oddsOfInfection) {
+        this.oddsOfInfection = oddsOfInfection;
+    }
+
+    public int getInfectionRadius() {
+        return infectionRadius;
+    }
+
+    public synchronized void updateInfectionRadius(int infectionRadius) {
+        this.infectionRadius = infectionRadius;
+        init();
+    }
+
+    public int getMinInfectionTime() {
+        return minInfectionTime;
+    }
+
+    public void setMinInfectionTime(int minInfectionTime) {
+        this.minInfectionTime = minInfectionTime;
+    }
+
+    public int getMaxInfectionTime() {
+        return maxInfectionTime;
+    }
+
+    public void setMaxInfectionTime(int maxInfectionTime) {
+        this.maxInfectionTime = maxInfectionTime;
+    }
+
+    public int getMinStayTime() {
+        return minStayTime;
+    }
+
+    public void setMinStayTime(int minStayTime) {
+        this.minStayTime = minStayTime;
+    }
+
+    public int getMaxStayTime() {
+        return maxStayTime;
+    }
+
+    public void setMaxStayTime(int maxStayTime) {
+        this.maxStayTime = maxStayTime;
     }
 }
