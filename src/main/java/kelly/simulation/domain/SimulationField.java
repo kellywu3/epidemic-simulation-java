@@ -15,7 +15,8 @@ public class SimulationField {
     public static final double DESTINATION_FORCE_FACTOR = 1;
 
     private static final Random random = new Random();
-    private Set<SimulationEventListener> listeners;
+    private Set<SimulationEventListener> simulationListeners;
+    private Set<FieldEventListener> fieldListeners;
     private ArrayList<int[]> timeData;
     private int timeIndex;
     private Subject[] subjects;
@@ -43,9 +44,9 @@ public class SimulationField {
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
     public SimulationField() {
-        listeners = new HashSet<>();
-        init();
-        initValues();
+        simulationListeners = new HashSet<>();
+        fieldListeners = new HashSet<>();
+        assignDefaultValues();
     }
 
     public void init() {
@@ -68,7 +69,7 @@ public class SimulationField {
         maxInfected = 0;
     }
 
-    public void initValues() {
+    public synchronized void assignDefaultValues() {
         subjectCount = 200;
         subjectMass = 10;
         frictionFactor = 0.98;
@@ -85,6 +86,8 @@ public class SimulationField {
         maxInfected = 0;
         minStayTime = 36;
         maxStayTime = 72;
+        init();
+        publishFieldEvent();
     }
 
     private int randomDuration() {
@@ -92,12 +95,22 @@ public class SimulationField {
     }
 
     public void addSimulationEventListener(SimulationEventListener l) {
-        listeners.add(l);
+        simulationListeners.add(l);
     }
 
-    private void publishEvent() {
-        for(SimulationEventListener l : listeners) {
+    public void addFieldEventListener(FieldEventListener l) {
+        fieldListeners.add(l);
+    }
+
+    private void publishSimulationEvent() {
+        for(SimulationEventListener l : simulationListeners) {
             l.onSimulationEvent();
+        }
+    }
+
+    private void publishFieldEvent() {
+        for(FieldEventListener l : fieldListeners) {
+            l.onFieldEvent();
         }
     }
 
@@ -120,14 +133,18 @@ public class SimulationField {
         }
     }
 
+    public synchronized void restartSimulation() {
+        init();
+        restarting = false;
+        paused = false;
+    }
+
     public void startSimulation() {
         restarting = true;
 
         while(true) {
             if(restarting) {
-                init();
-                restarting = false;
-                paused = false;
+                restartSimulation();
             }
             if(!paused) {
                 doSimulation();
@@ -146,7 +163,7 @@ public class SimulationField {
             doStatistics();
 
         }
-        publishEvent();
+        publishSimulationEvent();
         timeIndex++;
     }
 

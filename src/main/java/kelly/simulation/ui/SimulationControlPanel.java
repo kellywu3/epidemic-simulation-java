@@ -1,11 +1,13 @@
 package kelly.simulation.ui;
 
+import kelly.simulation.domain.FieldEventListener;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
 
-public class SimulationControlPanel extends JPanel {
+public class SimulationControlPanel extends JPanel implements FieldEventListener {
     private static final int CHAR_COUNT = 6;
+    private SimulationField field;
     private LabeledInput numberOfSubjects;
     private LabeledInput massOfSubjects;
     private LabeledInput boundHeight, boundWidth;
@@ -19,6 +21,9 @@ public class SimulationControlPanel extends JPanel {
     private LabeledInput frictionFactor;
 
     public SimulationControlPanel(SimulationField field) {
+        this.field = field;
+        field.addFieldEventListener(this);
+
         BoxLayout bl = new BoxLayout(this, BoxLayout.PAGE_AXIS);
         setLayout(bl);
         numberOfSubjects = new LabeledInput("Number of Subjects:" , CHAR_COUNT, field.getSubjectCount());
@@ -202,5 +207,24 @@ public class SimulationControlPanel extends JPanel {
             }
         });
         add(frictionFactor);
+    }
+
+    @Override
+    public void onFieldEvent() {
+        numberOfSubjects.setValue(field.getSubjectCount());
+        massOfSubjects.setValue(field.getSubjectMass());
+        boundHeight.setValue(field.getHeight());
+        boundWidth.setValue(field.getWidth());
+        oddsOfInitialSick.setValue(field.getOddsInitialSick());
+        oddsOfDestination.setValue(field.getOddsOfDestination());
+        oddsOfInfection.setValue(field.getOddsOfInfection());
+        destinationX.setValue(field.getDestinationX());
+        destinationY.setValue(field.getDestinationY());
+        infectionRadius.setValue(field.getInfectionRadius());
+        minInfectionTime.setValue(field.getMinInfectionTime());
+        maxInfectionTime.setValue(field.getMinInfectionTime());
+        minDestinationStayTime.setValue(field.getMinStayTime());
+        maxDestinationStayTime.setValue(field.getMaxStayTime());
+        frictionFactor.setValue(field.getFrictionFactor());
     }
 }

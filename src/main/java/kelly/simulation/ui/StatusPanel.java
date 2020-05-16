@@ -93,7 +93,8 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
             field.setDestinationOn(false);
             enableDestination.setText(TEXT_DESTINATION_ON);
         } else if(TEXT_RESET_VALUES.equals(e.getActionCommand())) {
-            field.initValues();
+            field.assignDefaultValues();
+            field.setRestarting(true);
         }
     }
 }
