@@ -19,7 +19,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
     private JLabel timeLabel = new JLabel("Time:");
     private JLabel eradicatedTimeLabel = new JLabel();
     private SimulationField field;
-    private JButton enableDestination;
+    private JCheckBox enableDestination;
     private JButton pauseButton;
     private JButton restartButton;
     private JButton resetValuesButton;
@@ -32,7 +32,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
 
         setLayout(new FlowLayout());
 
-        enableDestination = new JButton(TEXT_DESTINATION_ON);
+        enableDestination = new JCheckBox(TEXT_DESTINATION_ON);
         pauseButton = new JButton(TEXT_PAUSE);
         restartButton = new JButton(TEXT_RESTART);
         resetValuesButton = new JButton(TEXT_RESET_VALUES);
@@ -89,6 +89,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         } else if (TEXT_DESTINATION_ON.equals(e.getActionCommand())) {
             field.setDestinationOn(true);
             enableDestination.setText(TEXT_DESTINATION_OFF);
+            enableDestination.setSelected(true);
         } else if (TEXT_DESTINATION_OFF.equals(e.getActionCommand())) {
             field.setDestinationOn(false);
             enableDestination.setText(TEXT_DESTINATION_ON);
