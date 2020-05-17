@@ -16,15 +16,11 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
     public static final String TEXT_PLAY = "Play";
     public static final String TEXT_RESTART = "Restart";
     public static final String TEXT_RESET_VALUES = "Reset Values";
-    private JLabel timeLabel = new JLabel("Time:");
-    private JLabel eradicatedTimeLabel = new JLabel();
     private SimulationField field;
     private JCheckBox enableDestination;
     private JButton pauseButton;
     private JButton restartButton;
     private JButton resetValuesButton;
-    private NumberDisplay timeValue = new NumberDisplay(WIDTH);
-    private NumberDisplay eradicatedTime = new NumberDisplay(WIDTH);
 
     public StatusPanel(SimulationField field) {
         this.field = field;
@@ -36,18 +32,11 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
         pauseButton = new JButton(TEXT_PAUSE);
         restartButton = new JButton(TEXT_RESTART);
         resetValuesButton = new JButton(TEXT_RESET_VALUES);
-        timeValue = new NumberDisplay(WIDTH);
 
         add(enableDestination);
         add(pauseButton);
         add(restartButton);
         add(resetValuesButton);
-
-        add(timeLabel);
-        add(timeValue);
-        add(eradicatedTimeLabel);
-        add(eradicatedTime);
-        timeValue.setMinimumSize(new Dimension(500, 0));
 
         enableDestination.addActionListener(this);
         pauseButton.addActionListener(this);
@@ -57,14 +46,6 @@ public class StatusPanel extends JPanel implements SimulationEventListener, Acti
 
     @Override
     public void onSimulationEvent() {
-        timeValue.setValue(field.getTimeIndex());
-        if(field.getEradicatedTime() >= 0) {
-            eradicatedTimeLabel.setText("Eradicated At:");
-            eradicatedTime.setValue(field.getEradicatedTime());
-        } else {
-            eradicatedTimeLabel.setText(null);
-            eradicatedTime.setText(null);
-        }
     }
 
     @Override
