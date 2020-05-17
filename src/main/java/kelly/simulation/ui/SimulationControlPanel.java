@@ -11,7 +11,7 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
     private LabeledInput numberOfSubjects;
     private LabeledInput massOfSubjects;
     private LabeledInput boundHeight, boundWidth;
-    private LabeledInput oddsOfInitialSick;
+    private LabeledInput numberInitialSick;
     private LabeledInput oddsOfDestination;
     private LabeledInput oddsOfInfection;
     private LabeledInput destinationX, destinationY;
@@ -64,41 +64,17 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(massOfSubjects);
 
-        boundWidth = new LabeledInput("Bound Width:", CHAR_COUNT, field.getWidth());
-        boundWidth.setAlignmentX(SwingConstants.RIGHT);
-        boundWidth.addActionListener(e -> {
-            int oldVal = field.getWidth();
+        numberInitialSick = new LabeledInput("Number Initially Infected:" , CHAR_COUNT, field.getNumberInitialSick());
+        numberInitialSick.setAlignmentX(SwingConstants.RIGHT);
+        numberInitialSick.addActionListener(e -> {
+            int oldVal = field.getNumberInitialSick();
             try {
-                field.updateHiBound(new int[] {boundWidth.getIntValue(), boundHeight.getIntValue()});
+                field.getNumberInitialSick(numberInitialSick.getIntValue());
             } catch(NumberFormatException nfe) {
-                boundWidth.setValue(oldVal);
+                numberInitialSick.setValue(oldVal);
             }
         });
-        add(boundWidth);
-
-        boundHeight = new LabeledInput("Bound Height:", CHAR_COUNT, field.getHeight());
-        boundHeight.setAlignmentX(SwingConstants.RIGHT);
-        boundHeight.addActionListener(e -> {
-            int oldVal = field.getHeight();
-            try {
-                field.updateHiBound(new int[] {boundWidth.getIntValue(), boundHeight.getIntValue()});
-            } catch(NumberFormatException nfe) {
-                boundHeight.setValue(oldVal);
-            }
-        });
-        add(boundHeight);
-
-        oddsOfInitialSick = new LabeledInput("Odds of initial infection:" , CHAR_COUNT, field.getOddsInitialSick());
-        oddsOfInitialSick.setAlignmentX(SwingConstants.RIGHT);
-        oddsOfInitialSick.addActionListener(e -> {
-            double oldVal = field.getOddsInitialSick();
-            try {
-                field.updateOddsInitialSick(oddsOfInitialSick.getDoubleValue());
-            } catch(NumberFormatException nfe) {
-                oddsOfInitialSick.setValue(oldVal);
-            }
-        });
-        add(oddsOfInitialSick);
+        add(numberInitialSick);
 
         oddsOfDestination = new LabeledInput("Odds of Traveling to Destination:" , CHAR_COUNT, field.getOddsOfDestination());
         oddsOfDestination.setAlignmentX(SwingConstants.RIGHT);
@@ -111,30 +87,6 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
             }
         });
         add(oddsOfDestination);
-
-        destinationX = new LabeledInput("X-Coordinate Destination:", CHAR_COUNT, field.getDestinationX());
-        destinationX.setAlignmentX(SwingConstants.RIGHT);
-        destinationX.addActionListener(e -> {
-            double oldVal = field.getDestinationX();
-            try {
-                field.setDestination(new double[] {destinationX.getDoubleValue(), destinationY.getDoubleValue()});
-            } catch(NumberFormatException nfe) {
-                destinationX.setValue(oldVal);
-            }
-        });
-        add(destinationX);
-
-        destinationY = new LabeledInput("Y-Coordinate Destination:", CHAR_COUNT, field.getDestinationY());
-        destinationY.setAlignmentX(SwingConstants.RIGHT);
-        destinationY.addActionListener(e -> {
-            double oldVal = field.getDestinationY();
-            try {
-                field.setDestination(new double[] {destinationX.getDoubleValue(), destinationY.getDoubleValue()});
-            } catch(NumberFormatException nfe) {
-                destinationY.setValue(oldVal);
-            }
-        });
-        add(destinationY);
 
         oddsOfInfection = new LabeledInput("Odds of Infection:" , CHAR_COUNT, field.getOddsOfInfection());
         oddsOfInfection.setAlignmentX(SwingConstants.RIGHT);
@@ -213,13 +165,9 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
     public void onFieldEvent() {
         numberOfSubjects.setValue(field.getSubjectCount());
         massOfSubjects.setValue(field.getSubjectMass());
-        boundHeight.setValue(field.getHeight());
-        boundWidth.setValue(field.getWidth());
-        oddsOfInitialSick.setValue(field.getOddsInitialSick());
+        numberInitialSick.setValue(field.getNumberInitialSick());
         oddsOfDestination.setValue(field.getOddsOfDestination());
         oddsOfInfection.setValue(field.getOddsOfInfection());
-        destinationX.setValue(field.getDestinationX());
-        destinationY.setValue(field.getDestinationY());
         infectionRadius.setValue(field.getInfectionRadius());
         minInfectionTime.setValue(field.getMinInfectionTime());
         maxInfectionTime.setValue(field.getMinInfectionTime());

@@ -43,18 +43,18 @@ public class SIRPanel extends JPanel implements SimulationEventListener {
 
     @Override
     public void onSimulationEvent() {
-        int idx = field.getTimeData().size() - 1;
-        int[] sirCount = field.getTimeData().get(idx);
-        susceptibleCount.setValue(sirCount[HealthStatus.SUSCEPTIBLE.ordinal()]);
-        infectedCount.setValue(sirCount[HealthStatus.INFECTED.ordinal()]);
-        highestInfectedCount.setText(Integer.toString(field.getMaxInfected()));
-        removedCount.setValue(sirCount[HealthStatus.REMOVED.ordinal()]);
-
         timeValue.setValue(field.getTimeIndex());
+
         if(field.getEradicatedTime() >= 0) {
             eradicatedTimeLabel.setText("Eradicated At:");
             eradicatedTime.setValue(field.getEradicatedTime());
         } else {
+            int idx = field.getTimeData().size() - 1;
+            int[] sirCount = field.getTimeData().get(idx);
+            susceptibleCount.setValue(sirCount[HealthStatus.SUSCEPTIBLE.ordinal()]);
+            infectedCount.setValue(sirCount[HealthStatus.INFECTED.ordinal()]);
+            highestInfectedCount.setText(Integer.toString(field.getMaxInfected()));
+            removedCount.setValue(sirCount[HealthStatus.REMOVED.ordinal()]);
             eradicatedTime.setText(null);
             eradicatedTimeLabel.setText(null);
         }

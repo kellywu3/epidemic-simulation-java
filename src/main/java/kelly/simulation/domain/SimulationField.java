@@ -31,7 +31,7 @@ public class SimulationField {
     private int[] loBound;
     private double[] destination;
     private double oddsOfDestination;
-    private double oddsInitialSick;
+    private int numberInitialSick;
     private int infectionRadius;
     private double oddsOfInfection;
     private int minInfectionTime;
@@ -60,7 +60,7 @@ public class SimulationField {
             Subject s = createRandomSubject();
             s.setEventTime(i);
             subjects[i] = s;
-            if (random.nextDouble() < oddsInitialSick) {
+            if(i < numberInitialSick) {
                 s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
             }
         }
@@ -77,7 +77,7 @@ public class SimulationField {
         loBound = new int[] {0, 0};
         destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
         oddsOfDestination = 0.02;
-        oddsInitialSick = 0.02;
+        numberInitialSick = 2;
         infectionRadius = 30;
         oddsOfInfection = 0.2;
         minInfectionTime = 7;
@@ -252,14 +252,6 @@ public class SimulationField {
         return eradicatedTime;
     }
 
-    public int getHeight() {
-        return hiBound[1];
-    }
-
-    public int getWidth() {
-        return hiBound[0];
-    }
-
     public void setPaused(boolean paused) {
         this.paused = paused;
     }
@@ -293,24 +285,16 @@ public class SimulationField {
         hiBound = highBound;
     }
 
-    public double getOddsInitialSick() {
-        return oddsInitialSick;
+    public int getNumberInitialSick() {
+        return numberInitialSick;
     }
 
-    public synchronized void updateOddsInitialSick(double oddsInitialSick) {
-        this.oddsInitialSick = oddsInitialSick;
+    public synchronized void getNumberInitialSick(int oddsInitialSick) {
+        this.numberInitialSick = numberInitialSick;
         init();
     }
 
-    public double getDestinationX() {
-        return destination[0];
-    }
-
-    public double getDestinationY() {
-        return destination[1];
-    }
-
-    public void setDestination(double[] destination) {
+    public void updateDestination(double[] destination) {
         this.destination = destination;
     }
 

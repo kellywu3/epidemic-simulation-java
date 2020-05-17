@@ -21,6 +21,9 @@ public class SimulationDisplay extends JComponent implements SimulationEventList
                 field.updateHiBound(new int[] {
                     self.getWidth(), self.getHeight()
                 });
+                field.updateDestination(new double[] {
+                    self.getWidth() / 2, self.getHeight() / 2
+                });
             }
         });
     }

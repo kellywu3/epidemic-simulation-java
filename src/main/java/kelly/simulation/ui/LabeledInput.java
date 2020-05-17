@@ -48,13 +48,6 @@ public class LabeledInput extends JPanel {
         value.setText(Double.toString(val));
     }
 
-//    @Override
-//    public void paint(Graphics g) {
-//        super.paint(g);
-//        g.setColor(Color.RED);
-//        g.drawRect(0, 0, getWidth() - 2, getHeight() - 2);
-//    }
-
     private Dimension internalSize() {
         Dimension dl = label.getMinimumSize();
         Dimension dv = value.getMaximumSize();
