@@ -13,6 +13,7 @@ public class SimulationField {
     private static final double SUBJECT_INITIAL_MAX_VELOCITY = 1;
     private static final double MAX_RANDOM_FORCE = 2;
     public static final double DESTINATION_FORCE_FACTOR = 1;
+    public static final int BOUNDARY_DISTANCE = 10;
 
     private static final Random random = new Random();
     private Set<SimulationEventListener> simulationListeners;
@@ -20,15 +21,20 @@ public class SimulationField {
     private ArrayList<int[]> timeData;
     private int timeIndex;
     private Subject[] subjects;
+    public CommunityManager manager;
     private boolean paused = false;
     private boolean destinationOn = false;
+    private boolean communityOn = false;
+    private boolean quarantineOn = false;
+    private int communityRows;
+    private int communityColumns;
     private int subjectCount;
     private double subjectMass;
     public double frictionFactor;
     private boolean restarting;
     private int eradicatedTime;
-    private int[] hiBound;
-    private int[] loBound;
+    private int[] fieldSize;
+    private Bound fieldBound;
     private double[] destination;
     private double oddsOfDestination;
     private int numberInitialSick;
@@ -64,6 +70,8 @@ public class SimulationField {
                 s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
             }
         }
+        manager = new CommunityManager();
+        manager.updateCommunities(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
         timeIndex = subjects.length + 1;
         eradicatedTime = -1;
         maxInfected = 0;
@@ -73,9 +81,11 @@ public class SimulationField {
         subjectCount = 200;
         subjectMass = 10;
         frictionFactor = 0.98;
-        hiBound = new int[] {640, 480};
-        loBound = new int[] {0, 0};
-        destination = new double[] {0.5 * hiBound[0], 0.5 * hiBound[1]};
+        fieldSize = new int[] {640, 480};
+        fieldBound = new Bound(new int[] {0, 0}, fieldSize);
+        communityRows = 3;
+        communityColumns = 3;
+        destination = new double[] {0.5 * fieldSize[0], 0.5 * fieldSize[1]};
         oddsOfDestination = 0.02;
         numberInitialSick = 2;
         infectionRadius = 30;
@@ -114,7 +124,7 @@ public class SimulationField {
         }
     }
 
-    public void drawSubjects(Graphics g, ImageObserver observer) {
+    private void drawSubjects(Graphics g, ImageObserver observer) {
         for(Subject s : subjects) {
             Animatable a = healthAnimation.get(s.getStatus());
             Image img = a.getFrame(timeIndex - s.getEventTime());
@@ -123,6 +133,36 @@ public class SimulationField {
             int y = (int) (position[1] - img.getHeight(observer) / 2);
             g.drawImage(img, x, y, observer);
         }
+    }
+
+    private void drawCommunities(Graphics g) {
+        int boundaryWidth;
+        int boundaryLength;
+        if(communityOn) {
+            if(quarantineOn) {
+                boundaryWidth = (fieldSize[0] - (BOUNDARY_DISTANCE * (communityColumns + 2))) / (communityColumns + 1);
+                boundaryLength = (fieldSize[1] - (BOUNDARY_DISTANCE * (communityRows + 1))) / communityRows;
+                for(int x = (BOUNDARY_DISTANCE * 2) + boundaryWidth; x < fieldSize[0] - BOUNDARY_DISTANCE; x += boundaryWidth + BOUNDARY_DISTANCE) {
+                    for(int y = BOUNDARY_DISTANCE; y < fieldSize[1] - BOUNDARY_DISTANCE; y += boundaryLength + BOUNDARY_DISTANCE) {
+                        g.drawRect(x, y, boundaryWidth, boundaryLength);
+                    }
+                    g.drawRect(BOUNDARY_DISTANCE, BOUNDARY_DISTANCE, boundaryWidth, boundaryLength);
+                }
+            } else {
+                boundaryWidth = (fieldSize[0] - (BOUNDARY_DISTANCE * (communityColumns + 1))) / communityColumns;
+                boundaryLength = (fieldSize[1] - (BOUNDARY_DISTANCE * (communityRows + 1))) / communityRows;
+                for(int x = BOUNDARY_DISTANCE; x < fieldSize[0] - BOUNDARY_DISTANCE; x += boundaryWidth + BOUNDARY_DISTANCE) {
+                    for(int y = BOUNDARY_DISTANCE; y < fieldSize[1] - BOUNDARY_DISTANCE; y += boundaryLength + BOUNDARY_DISTANCE) {
+                        g.drawRect(x, y, boundaryWidth, boundaryLength);
+                    }
+                }
+            }
+        }
+    }
+
+    public void drawField(Graphics g, ImageObserver observer) {
+        drawSubjects(g, observer);
+        drawCommunities(g);
     }
 
     public static void safeSleep(long time) {
@@ -157,6 +197,7 @@ public class SimulationField {
         if(destinationOn) {
             assignDestination();
         }
+
         updateSubjects();
         simulateTransmission();
         if(eradicatedTime <= 0) {
@@ -193,8 +234,14 @@ public class SimulationField {
     }
 
     private void updateSubjects() {
-        for(Subject s : subjects) {
-            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), loBound, hiBound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
+        for(int i = 0; i < subjectCount; i++) {
+            Subject s = subjects[i];
+            Bound bound;
+            if(communityOn) {
+                bound = manager.getCommunity(i % (communityRows * communityColumns));
+                s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), bound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
+            }
+            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), fieldBound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
@@ -210,10 +257,10 @@ public class SimulationField {
     }
 
     private double[] randomPosition() {
-        int len = hiBound.length;
+        int len = fieldSize.length;
         double[] position = new double[len];
         for(int i = 0; i < len; i ++) {
-            position[i] = random.nextDouble() * hiBound[i];
+            position[i] = random.nextDouble() * fieldSize[i];
         }
         return position;
     }
@@ -281,15 +328,53 @@ public class SimulationField {
         this.subjectMass = subjectMass;
     }
 
-    public void updateHiBound(int[] highBound) {
-        hiBound = highBound;
+    public void updateFieldSize(int[] highBound) {
+        fieldSize = highBound;
+        fieldBound.setHiBound(highBound);
+        manager.updateCommunities(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+
+    }
+
+    public int getCommunityRows() {
+        return communityRows;
+    }
+
+    public void changeCommunityRows(int communityRows) {
+        if(this.communityRows == communityRows) {
+            return;
+        } else {
+            this.communityRows = communityRows;
+            manager.updateCommunities(quarantineOn, fieldSize, this.communityRows, communityColumns, BOUNDARY_DISTANCE);
+        }
+    }
+
+    public int getCommunityColumns() {
+        return communityColumns;
+    }
+
+    public void changeCommunityColumns(int communityColumns) {
+        if(this.communityColumns == communityColumns) {
+            return;
+        } else {
+            this.communityColumns = communityColumns;
+            manager.updateCommunities(quarantineOn, fieldSize, communityRows, this.communityColumns, BOUNDARY_DISTANCE);
+        }    }
+
+    public void setCommunityOn(boolean communityOn) {
+        this.communityOn = communityOn;
+        manager.updateCommunities(this.quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+    }
+
+    public void setQuarantineOn(boolean quarantineOn) {
+        this.quarantineOn = quarantineOn;
+        manager.updateCommunities(this.quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
     }
 
     public int getNumberInitialSick() {
         return numberInitialSick;
     }
 
-    public synchronized void getNumberInitialSick(int oddsInitialSick) {
+    public synchronized void setNumberInitialSick(int numberInitialSick) {
         this.numberInitialSick = numberInitialSick;
         init();
     }

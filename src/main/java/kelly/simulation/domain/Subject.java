@@ -28,7 +28,7 @@ public class Subject {
         return timeToChange >= 0 && timeIndex > timeToChange;
     }
 
-    public void update(double mass, double[] force, int[] loBound, int[] hiBound, int dt, double forceFactor, int timeIndex, double frictionFactor) {
+    public void update(double mass, double[] force, Bound bound, int dt, double forceFactor, int timeIndex, double frictionFactor) {
         if(destination != null) {
             applyDestinationForce(forceFactor, force);
         } else if(returnTime >= 0 && returnTime < timeIndex) {
@@ -41,7 +41,7 @@ public class Subject {
             double v = (velocity[i] + (a * dt)) * frictionFactor;
             double p = position[i] + (v * dt);
 
-            if((p <= loBound[i] && v < 0) || (p >= hiBound[i] && v > 0)) {
+            if((p <= bound.getLoBound()[i] && v < 0) || (p >= bound.getHiBound()[i] && v > 0)) {
                 v = -v;
                 p = position[i] + (v * dt);
             } else {

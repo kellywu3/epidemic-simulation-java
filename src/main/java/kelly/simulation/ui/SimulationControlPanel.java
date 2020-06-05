@@ -10,11 +10,10 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
     private SimulationField field;
     private LabeledInput numberOfSubjects;
     private LabeledInput massOfSubjects;
-    private LabeledInput boundHeight, boundWidth;
     private LabeledInput numberInitialSick;
     private LabeledInput oddsOfDestination;
     private LabeledInput oddsOfInfection;
-    private LabeledInput destinationX, destinationY;
+    private LabeledInput communityRows, communityColumns;
     private LabeledInput infectionRadius;
     private LabeledInput minInfectionTime, maxInfectionTime;
     private LabeledInput minDestinationStayTime, maxDestinationStayTime;
@@ -69,12 +68,38 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         numberInitialSick.addActionListener(e -> {
             int oldVal = field.getNumberInitialSick();
             try {
-                field.getNumberInitialSick(numberInitialSick.getIntValue());
+                field.setNumberInitialSick(numberInitialSick.getIntValue());
             } catch(NumberFormatException nfe) {
                 numberInitialSick.setValue(oldVal);
             }
         });
         add(numberInitialSick);
+
+        communityRows = new LabeledInput("Number of Community Rows:" , CHAR_COUNT, field.getCommunityRows());
+        communityRows.setAlignmentX(SwingConstants.RIGHT);
+        communityRows.addActionListener(e -> {
+            int oldVal = field.getCommunityRows();
+            try {
+                field.changeCommunityRows(communityRows.getIntValue());
+                field.setCommunityOn(true);
+            } catch(NumberFormatException nfe) {
+                communityRows.setValue(oldVal);
+            }
+        });
+        add(communityRows);
+
+        communityColumns = new LabeledInput("Number of Community Columns:" , CHAR_COUNT, field.getCommunityColumns());
+        communityColumns.setAlignmentX(SwingConstants.RIGHT);
+        communityColumns.addActionListener(e -> {
+            int oldVal = field.getCommunityColumns();
+            try {
+                field.changeCommunityColumns(communityColumns.getIntValue());
+                field.setCommunityOn(true);
+            } catch(NumberFormatException nfe) {
+                communityColumns.setValue(oldVal);
+            }
+        });
+        add(communityColumns);
 
         oddsOfDestination = new LabeledInput("Odds of Traveling to Destination:" , CHAR_COUNT, field.getOddsOfDestination());
         oddsOfDestination.setAlignmentX(SwingConstants.RIGHT);
