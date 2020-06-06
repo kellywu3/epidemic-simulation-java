@@ -70,7 +70,7 @@ public class SimulationField {
         }
         manager = new CommunityManager(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
         updateSubjectCommunity();
-        timeIndex = subjects.length + 1;
+        timeIndex = 0;
         eradicatedTime = -1;
         maxInfected = 0;
     }
@@ -211,6 +211,7 @@ public class SimulationField {
             if(HealthStatus.INFECTED.equals(s.getStatus())) {
                 for(Subject s2 : subjects) {
                     if(HealthStatus.SUSCEPTIBLE.equals(s2.getStatus())
+                        && s2.getCommunity() == s.getCommunity()
                         && random.nextDouble() < odds
                         && infectionRadiusSquared > MatrixUtil.distanceSquared(s2.getPosition(), s.getPosition())
                     ) {

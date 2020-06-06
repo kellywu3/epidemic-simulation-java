@@ -21,9 +21,9 @@ public class RadiatingDot implements Animatable {
     @Override
     public Image getFrame(int frameIndex) {
         int index = frameIndex % imageFrames.length;
-//        if(index < 0) {
-//            index += imageFrames.length;
-//        }
+        if(index < 0) {
+            index += imageFrames.length;
+        }
         BufferedImage result = imageFrames[index];
         if(result == null) {
             result = actuallyDrawIt(index);
