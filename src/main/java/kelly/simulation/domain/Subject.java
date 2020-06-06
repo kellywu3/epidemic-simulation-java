@@ -113,4 +113,8 @@ public class Subject {
     public void assignCommunity(int community) {
         this.community = community;
     }
+
+    public int getCommunity() {
+        return community;
+    }
 }

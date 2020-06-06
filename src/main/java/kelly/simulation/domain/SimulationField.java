@@ -34,7 +34,6 @@ public class SimulationField {
     private boolean restarting;
     private int eradicatedTime;
     private int[] fieldSize;
-    private double[] destination;
     private double oddsOfDestination;
     private int numberInitialSick;
     private int infectionRadius;
@@ -83,7 +82,6 @@ public class SimulationField {
         fieldSize = new int[] {640, 480};
         communityRows = 3;
         communityColumns = 3;
-        destination = new double[] {0.5 * fieldSize[0], 0.5 * fieldSize[1]};
         oddsOfDestination = 0.02;
         numberInitialSick = 2;
         infectionRadius = 30;
@@ -224,10 +222,12 @@ public class SimulationField {
     }
 
     private void assignDestination() {
-        if (random.nextDouble() < oddsOfDestination) {
-            int s = random.nextInt(subjects.length);
+        if(random.nextDouble() < oddsOfDestination) {
+            int i = random.nextInt(subjects.length);
             int returnTime = timeIndex + minStayTime + random.nextInt(maxStayTime - minStayTime);
-            subjects[s].assignDestination(destination, returnTime);
+            Subject s = subjects[i];
+            Bound bound = manager.getCommunity(s.getCommunity());
+            s.assignDestination(MatrixUtil.clone(bound.getCenter()), returnTime);
         }
     }
 
@@ -341,7 +341,7 @@ public class SimulationField {
         return communityRows;
     }
 
-    public void changeCommunityRows(int communityRows) {
+    public synchronized void changeCommunityRows(int communityRows) {
         this.communityRows = communityRows;
         updateSubjectCommunity();
     }
@@ -350,17 +350,17 @@ public class SimulationField {
         return communityColumns;
     }
 
-    public void changeCommunityColumns(int communityColumns) {
+    public synchronized void changeCommunityColumns(int communityColumns) {
         this.communityColumns = communityColumns;
         updateSubjectCommunity();
     }
 
-    public void setCommunityOn(boolean communityOn) {
+    public synchronized void setCommunityOn(boolean communityOn) {
         this.communityOn = communityOn;
         updateSubjectCommunity();
     }
 
-    public void setQuarantineOn(boolean quarantineOn) {
+    public synchronized void setQuarantineOn(boolean quarantineOn) {
         this.quarantineOn = quarantineOn;
         updateSubjectCommunity();
     }
@@ -372,10 +372,6 @@ public class SimulationField {
     public synchronized void setNumberInitialSick(int numberInitialSick) {
         this.numberInitialSick = numberInitialSick;
         init();
-    }
-
-    public void updateDestination(double[] destination) {
-        this.destination = destination;
     }
 
     public double getOddsOfDestination() {
