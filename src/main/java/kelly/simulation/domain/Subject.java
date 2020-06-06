@@ -7,14 +7,14 @@ public class Subject {
     private double[] velocity;
     private double[] destination;
     private double[] oldLocation;
+    private int community;
 
     private HealthStatus status = HealthStatus.SUSCEPTIBLE;
     private int eventTime;
     private int timeToChange = -1;
     private int returnTime = -1;
 
-    public Subject(double[] position, double[] velocity) {
-        this.position = position;
+    public Subject(double[] velocity) {
         this.velocity = velocity;
     }
 
@@ -28,7 +28,11 @@ public class Subject {
         return timeToChange >= 0 && timeIndex > timeToChange;
     }
 
-    public void update(double mass, double[] force, Bound bound, int dt, double forceFactor, int timeIndex, double frictionFactor) {
+    public void update(double mass, double[] force, CommunityManager mgr, double forceFactor, int timeIndex, double frictionFactor) {
+        Bound bound = mgr.getCommunity(community);
+        if(position == null) {
+            position = bound.randomPosition();
+        }
         if(destination != null) {
             applyDestinationForce(forceFactor, force);
         } else if(returnTime >= 0 && returnTime < timeIndex) {
@@ -38,14 +42,14 @@ public class Subject {
         }
         for(int i = 0; i < force.length; i++) {
             double a = force[i] / mass;
-            double v = (velocity[i] + (a * dt)) * frictionFactor;
-            double p = position[i] + (v * dt);
+            double v = (velocity[i] + a) * frictionFactor;
+            double p = position[i] + v;
 
             if((p <= bound.getLoBound()[i] && v < 0) || (p >= bound.getHiBound()[i] && v > 0)) {
                 v = -v;
-                p = position[i] + (v * dt);
+                p = position[i] + v;
             } else {
-                p = position[i] + (v * dt);
+                p = position[i] + v;
             }
 
             velocity[i] = v;
@@ -104,5 +108,9 @@ public class Subject {
 
     private void slowDown(double slowDownFactor) {
         MatrixUtil.applyScale(slowDownFactor, velocity);
+    }
+
+    public void assignCommunity(int community) {
+        this.community = community;
     }
 }

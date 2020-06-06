@@ -9,6 +9,13 @@ public class MatrixUtil {
         return result;
     }
 
+    public static double[] subtractFromFirst(double[] first, double[] second) {
+        for(int i = 0; i < first.length; i++) {
+            first[i] -= second[i];
+        }
+        return first;
+    }
+
     public static double[] applyScale(double scale, double[] original) {
         for(int i = 0; i < original.length; i++) {
             original[i] = original[i] * scale;

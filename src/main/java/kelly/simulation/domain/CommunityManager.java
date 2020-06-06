@@ -1,39 +1,40 @@
 package kelly.simulation.domain;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class CommunityManager {
     private ArrayList<Bound> communities;
 
-    public CommunityManager() {
+    public CommunityManager(boolean quarantineOn, int[] fieldSize, int rows, int cols, int boundaryDist) {
+        updateCommunities(quarantineOn, fieldSize, rows, cols, boundaryDist);
     }
 
     public void updateCommunities(boolean quarantineOn, int[] fieldSize, int rows, int cols, int boundaryDist) {
         communities = new ArrayList<>();
-        int width = 0;
-        int length = 0;
-        int lo[];
-        int hi[];
+        double[] lo;
+        double[] dimensions;
 
-//        if(quarantineOn) {
-//            communities.add(new Bound(new int[] {boundaryDist, boundaryDist}, new int[] {width, length}));
-//        }
+        if(quarantineOn) {
+            dimensions = new double[] {
+                (fieldSize[0] - (boundaryDist * (cols + 2))) / (cols + 1)
+                , (fieldSize[1] - (boundaryDist * (rows + 1))) / rows
+            };
+            communities.add(new Bound(new double[] {boundaryDist, boundaryDist}, dimensions));
+        } else {
+            dimensions = new double[] {
+                (fieldSize[0] - (boundaryDist * (cols + 1))) / cols
+                , (fieldSize[1] - (boundaryDist * (rows + 1))) / rows
+            };
+        }
 
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
                 if(quarantineOn) {
-                    width = (fieldSize[0] - (boundaryDist * (cols + 2))) / (cols + 1);
-                    length = (fieldSize[1] - (boundaryDist * (rows + 1))) / rows;
-                    lo = new int[] {((boundaryDist + width) * (j + 1)) + boundaryDist, ((boundaryDist + length) * i + boundaryDist)};
-                    hi = new int[] {lo[0] + width, lo[1] + length};
+                    lo = new double[] {((boundaryDist + dimensions[0]) * (j + 1)) + boundaryDist, ((boundaryDist + dimensions[1]) * i + boundaryDist)};
                 } else {
-                    width = (fieldSize[0] - (boundaryDist * (cols + 1))) / cols;
-                    length = (fieldSize[1] - (boundaryDist * (rows + 1))) / rows;
-                    lo = new int[] {((boundaryDist + width) * j) + boundaryDist, ((boundaryDist + length) * i + boundaryDist)};
-                    hi = new int[] {lo[0] + width, lo[1] + length};
+                    lo = new double[] {((boundaryDist + dimensions[0]) * j) + boundaryDist, ((boundaryDist + dimensions[1]) * i + boundaryDist)};
                 }
-                communities.add(new Bound(lo, hi));
+                communities.add(new Bound(lo, dimensions));
             }
         }
     }

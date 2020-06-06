@@ -34,7 +34,6 @@ public class SimulationField {
     private boolean restarting;
     private int eradicatedTime;
     private int[] fieldSize;
-    private Bound fieldBound;
     private double[] destination;
     private double oddsOfDestination;
     private int numberInitialSick;
@@ -70,8 +69,8 @@ public class SimulationField {
                 s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
             }
         }
-        manager = new CommunityManager();
-        manager.updateCommunities(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+        manager = new CommunityManager(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+        updateSubjectCommunity();
         timeIndex = subjects.length + 1;
         eradicatedTime = -1;
         maxInfected = 0;
@@ -82,7 +81,6 @@ public class SimulationField {
         subjectMass = 10;
         frictionFactor = 0.98;
         fieldSize = new int[] {640, 480};
-        fieldBound = new Bound(new int[] {0, 0}, fieldSize);
         communityRows = 3;
         communityColumns = 3;
         destination = new double[] {0.5 * fieldSize[0], 0.5 * fieldSize[1]};
@@ -236,15 +234,30 @@ public class SimulationField {
     private void updateSubjects() {
         for(int i = 0; i < subjectCount; i++) {
             Subject s = subjects[i];
-            Bound bound;
-            if(communityOn) {
-                bound = manager.getCommunity(i % (communityRows * communityColumns));
-                s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), bound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
-            }
-            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), fieldBound, 1, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
+            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), manager, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
             }
+        }
+    }
+
+    private void updateSubjectCommunity() {
+        int offset = quarantineOn ? 1 : 0;
+        int rows, cols;
+
+        if(communityOn) {
+            rows = communityRows;
+            cols = communityColumns;
+        } else {
+            rows = 1;
+            cols = 1;
+        }
+
+        int communities = rows * cols;
+        manager.updateCommunities(this.quarantineOn, fieldSize, rows, cols, BOUNDARY_DISTANCE);
+
+        for(int i = 0; i < subjectCount; i++) {
+            subjects[i].assignCommunity((i % communities) + offset);
         }
     }
 
@@ -256,17 +269,8 @@ public class SimulationField {
         };
     }
 
-    private double[] randomPosition() {
-        int len = fieldSize.length;
-        double[] position = new double[len];
-        for(int i = 0; i < len; i ++) {
-            position[i] = random.nextDouble() * fieldSize[i];
-        }
-        return position;
-    }
-
     private Subject createRandomSubject() {
-        return new Subject(randomPosition(), randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
+        return new Subject(randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
     }
 
     public int getTimeIndex() {
@@ -330,9 +334,7 @@ public class SimulationField {
 
     public void updateFieldSize(int[] highBound) {
         fieldSize = highBound;
-        fieldBound.setHiBound(highBound);
-        manager.updateCommunities(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
-
+        updateSubjectCommunity();
     }
 
     public int getCommunityRows() {
@@ -340,12 +342,8 @@ public class SimulationField {
     }
 
     public void changeCommunityRows(int communityRows) {
-        if(this.communityRows == communityRows) {
-            return;
-        } else {
-            this.communityRows = communityRows;
-            manager.updateCommunities(quarantineOn, fieldSize, this.communityRows, communityColumns, BOUNDARY_DISTANCE);
-        }
+        this.communityRows = communityRows;
+        updateSubjectCommunity();
     }
 
     public int getCommunityColumns() {
@@ -353,21 +351,18 @@ public class SimulationField {
     }
 
     public void changeCommunityColumns(int communityColumns) {
-        if(this.communityColumns == communityColumns) {
-            return;
-        } else {
-            this.communityColumns = communityColumns;
-            manager.updateCommunities(quarantineOn, fieldSize, communityRows, this.communityColumns, BOUNDARY_DISTANCE);
-        }    }
+        this.communityColumns = communityColumns;
+        updateSubjectCommunity();
+    }
 
     public void setCommunityOn(boolean communityOn) {
         this.communityOn = communityOn;
-        manager.updateCommunities(this.quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+        updateSubjectCommunity();
     }
 
     public void setQuarantineOn(boolean quarantineOn) {
         this.quarantineOn = quarantineOn;
-        manager.updateCommunities(this.quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
+        updateSubjectCommunity();
     }
 
     public int getNumberInitialSick() {
