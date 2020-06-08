@@ -42,4 +42,7 @@ public class CommunityManager {
     public Bound getCommunity(int idx) {
         return communities.get(idx);
     }
+    public ArrayList<Bound> getCommunities() {
+        return communities;
+    }
 }

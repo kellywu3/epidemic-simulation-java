@@ -55,13 +55,6 @@ public class RadiatingDot implements Animatable {
         int cd = 2 * coreRadius + 1;
         g.fillOval(cx, cx, cd, cd);
 
-        System.out.println("actuallyDrawIt: " + index
-            + " " + fr
-            + " " + rr
-            + " " + rr
-            + " " + a
-        );
-
         return buf;
     }
 }

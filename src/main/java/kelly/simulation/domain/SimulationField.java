@@ -53,7 +53,7 @@ public class SimulationField {
         assignDefaultValues();
     }
 
-    public void init() {
+    public synchronized void init() {
         healthAnimation = new EnumMap<>(HealthStatus.class);
         healthAnimation.put(HealthStatus.SUSCEPTIBLE, new RadiatingDot(Color.BLUE, 4, 4, 1, 1));
         healthAnimation.put(HealthStatus.INFECTED, new RadiatingDot(Color.RED, 4, infectionRadius, 1, 60));
@@ -120,38 +120,35 @@ public class SimulationField {
         }
     }
 
-    private void drawSubjects(Graphics g, ImageObserver observer) {
+    private synchronized void drawSubjects(Graphics g, ImageObserver observer) {
         for(Subject s : subjects) {
             Animatable a = healthAnimation.get(s.getStatus());
             Image img = a.getFrame(timeIndex - s.getEventTime());
             double[] position = s.getPosition();
-            int x = (int) (position[0] - img.getWidth(observer) / 2);
-            int y = (int) (position[1] - img.getHeight(observer) / 2);
-            g.drawImage(img, x, y, observer);
+            // Positions are not yet updated until the update method in Subject is called.
+            // The subjects should not be drawn if the position is not initialized.
+            if(position != null) {
+                int x = (int) (position[0] - img.getWidth(observer) / 2);
+                int y = (int) (position[1] - img.getHeight(observer) / 2);
+                g.drawImage(img, x, y, observer);
+                String d = s.getDestination() == null ? "none" : s.getDestination();
+                g.drawString(d, x, y);
+            }
         }
     }
 
     private void drawCommunities(Graphics g) {
-        int boundaryWidth;
-        int boundaryLength;
-        if(communityOn) {
-            if(quarantineOn) {
-                boundaryWidth = (fieldSize[0] - (BOUNDARY_DISTANCE * (communityColumns + 2))) / (communityColumns + 1);
-                boundaryLength = (fieldSize[1] - (BOUNDARY_DISTANCE * (communityRows + 1))) / communityRows;
-                for(int x = (BOUNDARY_DISTANCE * 2) + boundaryWidth; x < fieldSize[0] - BOUNDARY_DISTANCE; x += boundaryWidth + BOUNDARY_DISTANCE) {
-                    for(int y = BOUNDARY_DISTANCE; y < fieldSize[1] - BOUNDARY_DISTANCE; y += boundaryLength + BOUNDARY_DISTANCE) {
-                        g.drawRect(x, y, boundaryWidth, boundaryLength);
-                    }
-                    g.drawRect(BOUNDARY_DISTANCE, BOUNDARY_DISTANCE, boundaryWidth, boundaryLength);
-                }
-            } else {
-                boundaryWidth = (fieldSize[0] - (BOUNDARY_DISTANCE * (communityColumns + 1))) / communityColumns;
-                boundaryLength = (fieldSize[1] - (BOUNDARY_DISTANCE * (communityRows + 1))) / communityRows;
-                for(int x = BOUNDARY_DISTANCE; x < fieldSize[0] - BOUNDARY_DISTANCE; x += boundaryWidth + BOUNDARY_DISTANCE) {
-                    for(int y = BOUNDARY_DISTANCE; y < fieldSize[1] - BOUNDARY_DISTANCE; y += boundaryLength + BOUNDARY_DISTANCE) {
-                        g.drawRect(x, y, boundaryWidth, boundaryLength);
-                    }
-                }
+        for(Bound c : manager.getCommunities()) {
+            g.drawRect(
+                (int)c.getLoBound()[0]
+                , (int)c.getLoBound()[1]
+                , (int)c.getDimensions()[0]
+                , (int)c.getDimensions()[1]
+            );
+
+            if(destinationOn) {
+                int r = (int)c.getCommunityRadius();
+                g.drawOval((int)c.getCenter()[0] - r, (int)c.getCenter()[1] - r, 2 * r, 2 * r);
             }
         }
     }
@@ -193,6 +190,9 @@ public class SimulationField {
         if(destinationOn) {
             assignDestination();
         }
+        if(quarantineOn) {
+
+        }
 
         updateSubjects();
         simulateTransmission();
@@ -225,12 +225,23 @@ public class SimulationField {
     private void assignDestination() {
         if(random.nextDouble() < oddsOfDestination) {
             int i = random.nextInt(subjects.length);
-            int returnTime = timeIndex + minStayTime + random.nextInt(maxStayTime - minStayTime);
+            int duration = minStayTime + random.nextInt(maxStayTime - minStayTime);
             Subject s = subjects[i];
-            Bound bound = manager.getCommunity(s.getCommunity());
-            s.assignDestination(MatrixUtil.clone(bound.getCenter()), returnTime);
+            int b = quarantineOn ?
+                1 + random.nextInt(manager.getCommunities().size() - 1)
+                : (int) (random.nextDouble() * manager.getCommunities().size());
+            Bound bound = manager.getCommunities().get(b);
+            s.assignDestination(new Destination(MatrixUtil.clone(bound.getCenter()), duration, b));
         }
     }
+
+//    private void assignQuarantine() {
+//        for(Subject s : subjects) {
+//            if(s.getStatus().equals(HealthStatus.INFECTED)) {
+//                s.assignDestination(new Destination());
+//            }
+//        }
+//    }
 
     private void updateSubjects() {
         for(int i = 0; i < subjectCount; i++) {
@@ -421,7 +432,7 @@ public class SimulationField {
     }
 
     public void setMinStayTime(int minStayTime) {
-        this.minStayTime = minStayTime;
+        this.minStayTime = minStayTime > maxStayTime ? maxStayTime - 1 : minStayTime;
     }
 
     public int getMaxStayTime() {
@@ -429,7 +440,7 @@ public class SimulationField {
     }
 
     public void setMaxStayTime(int maxStayTime) {
-        this.maxStayTime = maxStayTime;
+        this.maxStayTime = maxStayTime < minStayTime ? minStayTime + 1 : maxStayTime;
     }
 
     public double getFrictionFactor() {

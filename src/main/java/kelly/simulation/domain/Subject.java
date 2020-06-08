@@ -2,20 +2,21 @@ package kelly.simulation.domain;
 
 import kelly.simulation.MatrixUtil;
 
+import java.util.Stack;
+
 public class Subject {
     private double[] position;
     private double[] velocity;
-    private double[] destination;
-    private double[] oldLocation;
+    private Stack<Destination> destinations;
     private int community;
 
     private HealthStatus status = HealthStatus.SUSCEPTIBLE;
     private int eventTime;
     private int timeToChange = -1;
-    private int returnTime = -1;
 
     public Subject(double[] velocity) {
         this.velocity = velocity;
+        destinations = new Stack<>();
     }
 
     public void updateHealth(HealthStatus status, int timeIndex, int duration) {
@@ -33,13 +34,16 @@ public class Subject {
         if(position == null) {
             position = bound.randomPosition();
         }
+
+        Destination destination = destinations.isEmpty() ? null : destinations.peek();
         if(destination != null) {
-            applyDestinationForce(forceFactor, force);
-        } else if(returnTime >= 0 && returnTime < timeIndex) {
-            destination = oldLocation;
-            oldLocation = null;
-            returnTime = -1;
+            applyDestinationForce(destination, timeIndex, forceFactor, force, mgr);
+            community = destination.getCommunity();
+            if(destination.getReturnTime() != -1 && destination.getReturnTime() < timeIndex) {
+                destinations.pop();
+            }
         }
+
         for(int i = 0; i < force.length; i++) {
             double a = force[i] / mass;
             double v = (velocity[i] + a) * frictionFactor;
@@ -73,30 +77,27 @@ public class Subject {
         return position;
     }
 
-    public void assignDestination(double[] destination, int returnTime) {
-        this.destination = destination;
-        if(returnTime >= 0) {
-            this.oldLocation = MatrixUtil.clone(position);
-            this.returnTime = returnTime;
-        }
+    public void assignDestination(Destination destination) {
+        destinations.add(new Destination(MatrixUtil.clone(position), -1, community));
+        destinations.add(destination);
     }
 
-    private void applyDestinationForce(double forceFactor, double[] force) {
+    private void applyDestinationForce(Destination destination, int timeIndex, double forceFactor, double[] force, CommunityManager mgr) {
         double[] destinationForce = new double[position.length];
         double distanceSquared = 0;
         for(int i = 0; i < position.length; i++) {
-            double d = destination[i] - position[i];
+            double d = destination.getPosition()[i] - position[i];
             distanceSquared += (d * d);
             destinationForce[i] = d;
         }
         double distance = Math.sqrt(distanceSquared);
-        if(distance < 1) {
-            slowDown(0);
-            destination = null;
-        } else if(distance < 20) {
-            slowDown(0.50);
-        } else if(distance < 40) {
-            slowDown(0.95);
+
+        double slowFactor = mgr.getCommunity(community).calculateSlowDown(distance);
+        if(slowFactor == 0 && destination.getReturnTime() == -1) {
+            slowDown(slowFactor);
+            destination.setReturnTime(timeIndex);
+        } else {
+            slowDown(slowFactor);
         }
 
         for(int i = 0; i < destinationForce.length; i++) {
@@ -116,5 +117,12 @@ public class Subject {
 
     public int getCommunity() {
         return community;
+    }
+
+    public String getDestination() {
+        if(destinations.isEmpty()) {
+            return null;
+        }
+        return Integer.toString(destinations.peek().getCommunity());
     }
 }
