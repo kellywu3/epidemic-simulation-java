@@ -15,6 +15,12 @@ public class Destination {
         returnTime = -1;
     }
 
+    public Destination(double[] position, int community) {
+        this.position = position;
+        this.community = community;
+        returnTime = -1;
+    }
+
     public double[] getPosition() {
         return position;
     }

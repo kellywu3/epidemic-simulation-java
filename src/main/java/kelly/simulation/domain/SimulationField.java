@@ -14,6 +14,7 @@ public class SimulationField {
     private static final double MAX_RANDOM_FORCE = 2;
     public static final double DESTINATION_FORCE_FACTOR = 1;
     public static final int BOUNDARY_DISTANCE = 10;
+    private static final int QUARANTINE_DELAY = 72;
 
     private static final Random random = new Random();
     private Set<SimulationEventListener> simulationListeners;
@@ -21,6 +22,7 @@ public class SimulationField {
     private ArrayList<int[]> timeData;
     private int timeIndex;
     private Subject[] subjects;
+    private HashSet<Subject> freeSubjects;
     public CommunityManager manager;
     private boolean paused = false;
     private boolean destinationOn = false;
@@ -60,12 +62,14 @@ public class SimulationField {
         healthAnimation.put(HealthStatus.REMOVED, new RadiatingDot(Color.GRAY, 4, 4, 1, 1));
         timeData = new ArrayList<>();
         this.subjects =  new Subject[subjectCount];
+        freeSubjects = new HashSet<>();
         for(int i = 0; i < subjectCount; i++) {
-            Subject s = createRandomSubject();
+            Subject s = createRandomSubject(i);
             s.setEventTime(i);
             subjects[i] = s;
+            freeSubjects.add(s);
             if(i < numberInitialSick) {
-                s.updateHealth(HealthStatus.INFECTED, i, randomDuration());
+                s.updateHealth(HealthStatus.INFECTED, i, randomDuration(), QUARANTINE_DELAY);
             }
         }
         manager = new CommunityManager(quarantineOn, fieldSize, communityRows, communityColumns, BOUNDARY_DISTANCE);
@@ -131,8 +135,6 @@ public class SimulationField {
                 int x = (int) (position[0] - img.getWidth(observer) / 2);
                 int y = (int) (position[1] - img.getHeight(observer) / 2);
                 g.drawImage(img, x, y, observer);
-                String d = s.getDestination() == null ? "none" : s.getDestination();
-                g.drawString(d, x, y);
             }
         }
     }
@@ -191,7 +193,7 @@ public class SimulationField {
             assignDestination();
         }
         if(quarantineOn) {
-
+            quarantineTheSick();
         }
 
         updateSubjects();
@@ -215,40 +217,47 @@ public class SimulationField {
                         && random.nextDouble() < odds
                         && infectionRadiusSquared > MatrixUtil.distanceSquared(s2.getPosition(), s.getPosition())
                     ) {
-                        s2.updateHealth(HealthStatus.INFECTED, timeIndex, randomDuration());
+                        s2.updateHealth(HealthStatus.INFECTED, timeIndex, randomDuration(), QUARANTINE_DELAY);
                     }
                 }
             }
         }
     }
 
-    private void assignDestination() {
+    private synchronized void assignDestination() {
         if(random.nextDouble() < oddsOfDestination) {
             int i = random.nextInt(subjects.length);
             int duration = minStayTime + random.nextInt(maxStayTime - minStayTime);
             Subject s = subjects[i];
-            int b = quarantineOn ?
-                1 + random.nextInt(manager.getCommunities().size() - 1)
-                : (int) (random.nextDouble() * manager.getCommunities().size());
-            Bound bound = manager.getCommunities().get(b);
-            s.assignDestination(new Destination(MatrixUtil.clone(bound.getCenter()), duration, b));
+            if(freeSubjects.contains(s)) {
+                // Makes sure that the position of the subject and the bound of the destination do not contradict each other.
+                // Subjects in transit will not add a new destination to the stack.
+                if (manager.getCommunity(s.getCommunity()).withinBounds(s.getPosition())) {
+                    int b = quarantineOn ?
+                        1 + random.nextInt(manager.getCommunities().size() - 1)
+                        : (int) (random.nextDouble() * manager.getCommunities().size());
+                    Bound bound = manager.getCommunities().get(b);
+                    s.assignDestination(new Destination(MatrixUtil.clone(bound.getCenter()), duration, b));
+                }
+            }
         }
     }
 
-//    private void assignQuarantine() {
-//        for(Subject s : subjects) {
-//            if(s.getStatus().equals(HealthStatus.INFECTED)) {
-//                s.assignDestination(new Destination());
-//            }
-//        }
-//    }
+    private void quarantineTheSick() {
+        for(Subject s : subjects) {
+            if(s.getStatus().equals(HealthStatus.INFECTED) && s.isTimeForQuarantine(timeIndex)) {
+                s.assignQuarantine(manager);
+                freeSubjects.remove(s);
+            }
+        }
+    }
 
     private void updateSubjects() {
         for(int i = 0; i < subjectCount; i++) {
             Subject s = subjects[i];
             s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), manager, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
             if(s.isTimeToChange(timeIndex)) {
-                s.updateHealth(HealthStatus.REMOVED, timeIndex, -1);
+                s.updateHealth(HealthStatus.REMOVED, timeIndex, -1, QUARANTINE_DELAY);
             }
         }
     }
@@ -281,8 +290,8 @@ public class SimulationField {
         };
     }
 
-    private Subject createRandomSubject() {
-        return new Subject(randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
+    private Subject createRandomSubject(int id) {
+        return new Subject(id, randomVector(SUBJECT_INITIAL_MAX_VELOCITY));
     }
 
     public int getTimeIndex() {
@@ -415,23 +424,23 @@ public class SimulationField {
         return minInfectionTime;
     }
 
-    public void setMinInfectionTime(int minInfectionTime) {
-        this.minInfectionTime = minInfectionTime;
+    public synchronized void setMinInfectionTime(int minInfectionTime) {
+        this.minInfectionTime = minInfectionTime > maxInfectionTime ? maxInfectionTime - 1 : minInfectionTime;
     }
 
     public int getMaxInfectionTime() {
         return maxInfectionTime;
     }
 
-    public void setMaxInfectionTime(int maxInfectionTime) {
-        this.maxInfectionTime = maxInfectionTime;
+    public synchronized void setMaxInfectionTime(int maxInfectionTime) {
+        this.maxInfectionTime = maxInfectionTime < minInfectionTime ? minInfectionTime + 1 : maxInfectionTime;
     }
 
     public int getMinStayTime() {
         return minStayTime;
     }
 
-    public void setMinStayTime(int minStayTime) {
+    public synchronized void setMinStayTime(int minStayTime) {
         this.minStayTime = minStayTime > maxStayTime ? maxStayTime - 1 : minStayTime;
     }
 
@@ -439,7 +448,7 @@ public class SimulationField {
         return maxStayTime;
     }
 
-    public void setMaxStayTime(int maxStayTime) {
+    public synchronized void setMaxStayTime(int maxStayTime) {
         this.maxStayTime = maxStayTime < minStayTime ? minStayTime + 1 : maxStayTime;
     }
 
