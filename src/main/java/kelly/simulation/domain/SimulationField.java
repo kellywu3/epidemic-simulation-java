@@ -24,10 +24,10 @@ public class SimulationField {
     private Subject[] subjects;
     private HashSet<Subject> freeSubjects;
     public CommunityManager manager;
-    private boolean paused = false;
-    private boolean destinationOn = false;
-    private boolean communityOn = false;
-    private boolean quarantineOn = false;
+    public boolean paused;
+    public boolean destinationOn;
+    public boolean communityOn;
+    public boolean quarantineOn;
     private int communityRows;
     private int communityColumns;
     private int subjectCount;
@@ -46,6 +46,7 @@ public class SimulationField {
     private int maxInfected;
     private int minStayTime;
     private int maxStayTime;
+    public boolean describe;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
@@ -80,7 +81,7 @@ public class SimulationField {
     }
 
     public synchronized void assignDefaultValues() {
-        subjectCount = 200;
+        subjectCount = 18;
         subjectMass = 10;
         frictionFactor = 0.98;
         fieldSize = new int[] {640, 480};
@@ -90,12 +91,17 @@ public class SimulationField {
         numberInitialSick = 2;
         infectionRadius = 30;
         oddsOfInfection = 0.2;
-        minInfectionTime = 7;
-        maxInfectionTime = 21;
+        minInfectionTime = 36;
+        maxInfectionTime = 72;
         timeScale = 72;
         maxInfected = 0;
         minStayTime = 36;
         maxStayTime = 72;
+        paused = false;
+        destinationOn = false;
+        communityOn = false;
+        quarantineOn = false;
+        describe = false;
         init();
         publishFieldEvent();
     }
@@ -135,6 +141,9 @@ public class SimulationField {
                 int x = (int) (position[0] - img.getWidth(observer) / 2);
                 int y = (int) (position[1] - img.getHeight(observer) / 2);
                 g.drawImage(img, x, y, observer);
+                if(describe) {
+                    g.drawString(s.describe(), (int) position[0], (int) position[1]);
+                }
             }
         }
     }
@@ -244,12 +253,14 @@ public class SimulationField {
     }
 
     private void quarantineTheSick() {
-        for(Subject s : subjects) {
+        HashSet<Subject> toBeRemoved = new HashSet<>();
+        for(Subject s : freeSubjects) {
             if(s.getStatus().equals(HealthStatus.INFECTED) && s.isTimeForQuarantine(timeIndex)) {
                 s.assignQuarantine(manager);
-                freeSubjects.remove(s);
+                toBeRemoved.add(s);
             }
         }
+        freeSubjects.removeAll(toBeRemoved);
     }
 
     private void updateSubjects() {
@@ -458,5 +469,13 @@ public class SimulationField {
 
     public void setFrictionFactor(double frictionFactor) {
         this.frictionFactor = frictionFactor;
+    }
+
+    public boolean isDescribe() {
+        return describe;
+    }
+
+    public void setDescribe(boolean describe) {
+        this.describe = describe;
     }
 }

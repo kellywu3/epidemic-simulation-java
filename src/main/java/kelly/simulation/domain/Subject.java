@@ -13,6 +13,7 @@ public class Subject {
     private int eventTime;
     private int timeToChange = -1;
     private int timeForQuarantine = -1;
+    private boolean quarantined;
 
     public Subject(int id, double[] velocity) {
         this.velocity = velocity;
@@ -107,7 +108,7 @@ public class Subject {
         // Once the method returns '0', the subject has "arrived" at the destination.
         if(destination.getReturnTime() < 0) {
             if(slowFactor == 0){
-                if(isTimeForQuarantine(timeIndex)) {
+                if(quarantined) {
                     destinations.clear();
                 }
                 destination.setReturnTime(timeIndex);
@@ -134,13 +135,18 @@ public class Subject {
     }
 
     public boolean isTimeForQuarantine(int timeIndex) {
-        return timeForQuarantine > 0 && timeForQuarantine < timeIndex;
+        if(!quarantined && timeForQuarantine > 0 && timeForQuarantine < timeIndex) {
+            quarantined = true;
+            return true;
+        }
+        return false;
     }
 
     public String describe() {
         double[] pos = destinations.isEmpty() ? new double[] {-1, -1} : destinations.peek().getPosition();
-        return String.format("%d - %d - (%d, %d)", id, community
+        return String.format("%d - %d - (%d, %d) - %d", id, community
             , Math.round(pos[0]), Math.round(pos[1])
+            , destinations.size()
             );
     }
 }
