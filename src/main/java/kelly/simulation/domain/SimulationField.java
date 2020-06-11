@@ -246,7 +246,7 @@ public class SimulationField {
                         1 + random.nextInt(manager.getCommunities().size() - 1)
                         : (int) (random.nextDouble() * manager.getCommunities().size());
                     Bound bound = manager.getCommunities().get(b);
-                    s.assignDestination(new Destination(MatrixUtil.clone(bound.getCenter()), duration, b));
+                    s.assignDestination(Destination.createCommunityCenterDestination(MatrixUtil.clone(bound.getCenter()), duration, b));
                 }
             }
         }
@@ -365,7 +365,7 @@ public class SimulationField {
         this.subjectMass = subjectMass;
     }
 
-    public void updateFieldSize(int[] highBound) {
+    public synchronized void updateFieldSize(int[] highBound) {
         fieldSize = highBound;
         updateSubjectCommunity();
     }
@@ -439,7 +439,7 @@ public class SimulationField {
     }
 
     public synchronized void setMinInfectionTime(int minInfectionTime) {
-        this.minInfectionTime = minInfectionTime > maxInfectionTime ? maxInfectionTime - 1 : minInfectionTime;
+        this.minInfectionTime = minInfectionTime;
     }
 
     public int getMaxInfectionTime() {
@@ -447,7 +447,7 @@ public class SimulationField {
     }
 
     public synchronized void setMaxInfectionTime(int maxInfectionTime) {
-        this.maxInfectionTime = maxInfectionTime < minInfectionTime ? minInfectionTime + 1 : maxInfectionTime;
+        this.maxInfectionTime = maxInfectionTime;
     }
 
     public int getMinStayTime() {
@@ -455,7 +455,7 @@ public class SimulationField {
     }
 
     public synchronized void setMinStayTime(int minStayTime) {
-        this.minStayTime = minStayTime > maxStayTime ? maxStayTime - 1 : minStayTime;
+        this.minStayTime = minStayTime;
     }
 
     public int getMaxStayTime() {
@@ -463,7 +463,7 @@ public class SimulationField {
     }
 
     public synchronized void setMaxStayTime(int maxStayTime) {
-        this.maxStayTime = maxStayTime < minStayTime ? minStayTime + 1 : maxStayTime;
+        this.maxStayTime = maxStayTime;
     }
 
     public double getFrictionFactor() {

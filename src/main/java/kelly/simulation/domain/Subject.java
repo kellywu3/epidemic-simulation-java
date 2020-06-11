@@ -1,6 +1,7 @@
 package kelly.simulation.domain;
 
 import kelly.simulation.MatrixUtil;
+
 import java.util.Stack;
 
 public class Subject {
@@ -42,11 +43,13 @@ public class Subject {
 
         Destination destination = destinations.isEmpty() ? null : destinations.peek();
         if(destination != null) {
-            if(destination.getReturnTime() < 0) {
+            if(destination.getCommunity() >= mgr.getCommunities().size()) {
+                destinations.pop();
+            } else if(destination.getReturnTime() < 0) {
                 applyDestinationForce(destination, timeIndex, forceFactor, force, mgr);
                 community = destination.getCommunity();
                 bound = mgr.getCommunity(community);
-            } else if(destination.getReturnTime() > 0 && destination.getReturnTime() > timeIndex) {
+            } else if(destination.isTimeToReturn(timeIndex)) {
                 destinations.pop();
             }
         }
@@ -85,12 +88,12 @@ public class Subject {
     }
 
     public synchronized void assignDestination(Destination destination) {
-        destinations.add(new Destination(MatrixUtil.clone(position), 1, community));
+        destinations.add(Destination.createOldLocationDestination(MatrixUtil.clone(position), 1, community));
         destinations.add(destination);
     }
 
     public synchronized void assignQuarantine(CommunityManager mgr) {
-        assignDestination(new Destination(mgr.getCommunity(0).getCenter(), 0));
+        assignDestination(Destination.createQuarantineDestination(mgr.getCommunity(0).getCenter(), 0));
     }
 
     private void applyDestinationForce(Destination destination, int timeIndex, double forceFactor, double[] force, CommunityManager mgr) {
@@ -106,12 +109,9 @@ public class Subject {
         double slowFactor = mgr.calculateSlowDown(distance);
         // The calculate slow down method returns '0' once the distance is within a certain, close range to the destination.
         // Once the method returns '0', the subject has "arrived" at the destination.
-        if(destination.getReturnTime() < 0) {
-            if(slowFactor == 0){
-                if(quarantined) {
-                    destinations.clear();
-                }
-                destination.setReturnTime(timeIndex);
+        if(!destination.isTimeToReturn(timeIndex)) {
+            if(mgr.arrived(distance)){
+                processArrived(destination, timeIndex);
             }
             slowDown(slowFactor);
             for(int i = 0; i < destinationForce.length; i++) {
@@ -142,11 +142,27 @@ public class Subject {
         return false;
     }
 
+    private void processArrived(Destination destination, int timeIndex) {
+        switch(destination.checkType()) {
+            case QUARANTINE :
+                destinations.clear();
+                break;
+            case OLD_LOCATION :
+                destinations.pop();
+                break;
+            case COMMUNITY_CENTER :
+                destination.setReturnTime(timeIndex);
+                break;
+        }
+    }
+
     public String describe() {
-        double[] pos = destinations.isEmpty() ? new double[] {-1, -1} : destinations.peek().getPosition();
+        Destination dest = destinations.isEmpty() ? null : destinations.peek();
+        double[] pos = dest == null ? new double[] {-1, -1} : dest.getPosition();
+//        int duration = dest == null ? 0 : dest.getDuration();
         return String.format("%d - %d - (%d, %d) - %d", id, community
             , Math.round(pos[0]), Math.round(pos[1])
             , destinations.size()
-            );
+        );
     }
 }

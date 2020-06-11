@@ -130,7 +130,12 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         minInfectionTime.addActionListener(e -> {
             int oldVal = field.getMinInfectionTime();
             try {
-                field.setMinInfectionTime(minInfectionTime.getIntValue());
+                int time = minInfectionTime.getIntValue();
+                if(time > field.getMaxInfectionTime()) {
+                    time = field.getMaxInfectionTime() - 1;
+                    minInfectionTime.setValue(time);
+                }
+                field.setMinInfectionTime(time);
             } catch(NumberFormatException nfe) {
                 minInfectionTime.setValue(oldVal);
             }
@@ -142,7 +147,12 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         maxInfectionTime.addActionListener(e -> {
             int oldVal = field.getMaxInfectionTime();
             try {
-                field.setMaxInfectionTime(maxInfectionTime.getIntValue());
+                int time = maxInfectionTime.getIntValue();
+                if(time < field.getMinInfectionTime()) {
+                    time = field.getMinInfectionTime() + 1;
+                    maxInfectionTime.setValue(time);
+                }
+                field.setMaxInfectionTime(time);
             } catch(NumberFormatException nfe) {
                 maxInfectionTime.setValue(oldVal);
             }
@@ -154,7 +164,12 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         minDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMinStayTime();
             try {
-                field.setMinStayTime(minDestinationStayTime.getIntValue());
+                int time = minDestinationStayTime.getIntValue();
+                if(time > field.getMaxStayTime()) {
+                    time = field.getMaxStayTime() - 1;
+                    minDestinationStayTime.setValue(time);
+                }
+                field.setMinStayTime(time);
             } catch(NumberFormatException nfe) {
                 minDestinationStayTime.setValue(oldVal);
             }
@@ -166,7 +181,12 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         maxDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMaxStayTime();
             try {
-                field.setMaxStayTime(maxDestinationStayTime.getIntValue());
+                int time = maxDestinationStayTime.getIntValue();
+                if(time < field.getMinStayTime()) {
+                    time = field.getMinStayTime() + 1;
+                    maxDestinationStayTime.setValue(time);
+                }
+                field.setMaxStayTime(time);
             } catch(NumberFormatException nfe) {
                 maxDestinationStayTime.setValue(oldVal);
             }
@@ -195,7 +215,7 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         oddsOfInfection.setValue(field.getOddsOfInfection());
         infectionRadius.setValue(field.getInfectionRadius());
         minInfectionTime.setValue(field.getMinInfectionTime());
-        maxInfectionTime.setValue(field.getMinInfectionTime());
+        maxInfectionTime.setValue(field.getMaxInfectionTime());
         minDestinationStayTime.setValue(field.getMinStayTime());
         maxDestinationStayTime.setValue(field.getMaxStayTime());
         frictionFactor.setValue(field.getFrictionFactor());

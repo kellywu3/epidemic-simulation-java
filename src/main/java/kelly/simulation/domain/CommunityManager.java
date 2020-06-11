@@ -53,7 +53,8 @@ public class CommunityManager {
 
         fieldScale = (fieldSize[0] + fieldSize[1]) / 2;
         slowDownDistances = new ArrayList<>();
-        slowDownDistances.add(new SlowDownDistance(0.0001 * fieldScale, 0));
+        slowDownDistances.add(new SlowDownDistance(1, 0));
+        slowDownDistances.add(new SlowDownDistance(0.005 * fieldScale, 0.60));
         slowDownDistances.add(new SlowDownDistance(0.05 * fieldScale, 0.90));
         slowDownDistances.add(new SlowDownDistance(0.2 * fieldScale, 0.98));
     }
@@ -73,5 +74,9 @@ public class CommunityManager {
             }
         }
         return 1;
+    }
+
+    public boolean arrived(double distance) {
+        return calculateSlowDown(distance) == 0;
     }
 }
