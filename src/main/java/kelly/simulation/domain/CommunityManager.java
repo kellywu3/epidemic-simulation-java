@@ -22,7 +22,7 @@ public class CommunityManager {
         updateCommunities(quarantineOn, fieldSize, rows, cols, boundaryDist);
     }
 
-    public void updateCommunities(boolean quarantineOn, int[] fieldSize, int rows, int cols, int boundaryDist) {
+    public synchronized void updateCommunities(boolean quarantineOn, int[] fieldSize, int rows, int cols, int boundaryDist) {
         communities = new ArrayList<>();
         double[] lo;
         double[] dimensions;
@@ -58,11 +58,11 @@ public class CommunityManager {
         slowDownDistances.add(new SlowDownDistance(0.2 * fieldScale, 0.98));
     }
 
-    public Bound getCommunity(int idx) {
+    public synchronized Bound getCommunity(int idx) {
         return communities.get(idx);
     }
 
-    public ArrayList<Bound> getCommunities() {
+    public synchronized ArrayList<Bound> getCommunities() {
         return communities;
     }
 

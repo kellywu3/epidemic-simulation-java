@@ -16,7 +16,7 @@ public class Bound {
 
     public Bound(double[] loBound, double[] dimensions) {
         this.setBounds(loBound, dimensions);
-        radius = getRadius();
+        radius = calculateRadius();
     }
 
     public void setBounds(double[] loBound, double[] dimensions) {
@@ -41,7 +41,7 @@ public class Bound {
         return dimensions;
     }
 
-    public double getRadius() {
+    public double calculateRadius() {
         return Math.sqrt(Math.pow(dimensions[0], 2) + Math.pow(dimensions[1], 2)) / 4;
     }
 
@@ -57,7 +57,7 @@ public class Bound {
             0.5
             , MatrixUtil.addToFirst(MatrixUtil.clone(hiBound), loBound)
         );
-        radius = getRadius();
+        radius = calculateRadius();
     }
 
     public double[] randomPosition() {

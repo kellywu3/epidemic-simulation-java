@@ -1,15 +1,12 @@
 package kelly.simulation.ui;
 
-import kelly.simulation.domain.SimulationEventListener;
+import kelly.simulation.domain.FieldEventListener;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class StatusPanel extends JPanel implements SimulationEventListener {
-    private static final int WIDTH = 64;
+public class StatusPanel extends JPanel implements FieldEventListener {
     public static final String TEXT_DESTINATION = "Destination";
     public static final String TEXT_COMMUNITIES = "Communities";
     public static final String TEXT_QUARANTINE = "Quarantine";
@@ -29,7 +26,7 @@ public class StatusPanel extends JPanel implements SimulationEventListener {
 
     public StatusPanel(SimulationField field) {
         this.field = field;
-        field.addSimulationEventListener(this);
+        field.addFieldEventListener(this);
         setLayout(new FlowLayout());
 
         enableDestination = new JCheckBox(TEXT_DESTINATION);
@@ -83,7 +80,10 @@ public class StatusPanel extends JPanel implements SimulationEventListener {
     }
 
     @Override
-    public void onSimulationEvent() {
+    public void onFieldEvent() {
+        enableDestination.setSelected(field.destinationOn);
+        enableQuarantine.setSelected(field.quarantineOn);
+        enableCommunities.setSelected(field.communityOn);
     }
 
     @Override

@@ -345,6 +345,7 @@ public class SimulationField {
 
     public void setDestinationOn(boolean destinationOn) {
         this.destinationOn = destinationOn;
+        publishFieldEvent();
     }
 
     public int getMaxInfected() {
@@ -390,11 +391,13 @@ public class SimulationField {
     public synchronized void setCommunityOn(boolean communityOn) {
         this.communityOn = communityOn;
         updateSubjectCommunity();
+        publishFieldEvent();
     }
 
     public synchronized void setQuarantineOn(boolean quarantineOn) {
         this.quarantineOn = quarantineOn;
         updateSubjectCommunity();
+        publishFieldEvent();
     }
 
     public int getNumberInitialSick() {
@@ -469,10 +472,6 @@ public class SimulationField {
 
     public void setFrictionFactor(double frictionFactor) {
         this.frictionFactor = frictionFactor;
-    }
-
-    public boolean isDescribe() {
-        return describe;
     }
 
     public void setDescribe(boolean describe) {

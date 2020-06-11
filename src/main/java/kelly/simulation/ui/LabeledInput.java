@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 public class LabeledInput extends JPanel {
     private JLabel label;
     private JTextField value;
-    private int inpuutSize;
+    private int inputSize;
 
     public LabeledInput(String description, int inputSize, int initValue) {
         this(description, inputSize, Integer.toString(initValue));
@@ -20,7 +20,7 @@ public class LabeledInput extends JPanel {
     }
 
     public LabeledInput(String description, int inputSize, String initValue) {
-        this.inpuutSize = inputSize;
+        this.inputSize = inputSize;
         value = new JTextField(inputSize);
         value.setText(initValue);
         label = new JLabel(description);
@@ -51,9 +51,9 @@ public class LabeledInput extends JPanel {
     private Dimension internalSize() {
         Dimension dl = label.getMinimumSize();
         Dimension dv = value.getMaximumSize();
-        int w = dl.width + inpuutSize * 18;
+        int w = dl.width + inputSize * 18;
         int h = 26
-                //Math.max(dl.height, dv.height)
+                // Math.max(dl.height, dv.height)
            ;
         return new Dimension(w, h);
     }

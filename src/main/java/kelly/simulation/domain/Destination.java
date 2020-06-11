@@ -25,24 +25,8 @@ public class Destination {
         return position;
     }
 
-    public void setPosition(double[] position) {
-        this.position = position;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
     public int getCommunity() {
         return community;
-    }
-
-    public void setCommunity(int community) {
-        this.community = community;
     }
 
     public int getReturnTime() {
