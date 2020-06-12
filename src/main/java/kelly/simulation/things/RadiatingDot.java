@@ -21,9 +21,9 @@ public class RadiatingDot implements Animatable {
     @Override
     public Image getFrame(int frameIndex) {
         int index = frameIndex % imageFrames.length;
-//        if(index < 0) {
-//            index += imageFrames.length;
-//        }
+        if(index < 0) {
+            index += imageFrames.length;
+        }
         BufferedImage result = imageFrames[index];
         if(result == null) {
             result = actuallyDrawIt(index);
@@ -54,13 +54,6 @@ public class RadiatingDot implements Animatable {
         int cx = fr - coreRadius;
         int cd = 2 * coreRadius + 1;
         g.fillOval(cx, cx, cd, cd);
-
-        System.out.println("actuallyDrawIt: " + index
-            + " " + fr
-            + " " + rr
-            + " " + rr
-            + " " + a
-        );
 
         return buf;
     }

@@ -18,11 +18,8 @@ public class SimulationDisplay extends JComponent implements SimulationEventList
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                field.updateHiBound(new int[] {
+                field.updateFieldSize(new int[] {
                     self.getWidth(), self.getHeight()
-                });
-                field.updateDestination(new double[] {
-                    self.getWidth() / 2, self.getHeight() / 2
                 });
             }
         });
@@ -30,7 +27,7 @@ public class SimulationDisplay extends JComponent implements SimulationEventList
 
     @Override
     public void paint(Graphics g) {
-        field.drawSubjects(g, this);
+        field.drawField(g, this);
     }
 
     @Override

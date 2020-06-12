@@ -4,13 +4,8 @@ import kelly.simulation.ui.*;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     private SimulationField field;
