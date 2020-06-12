@@ -35,10 +35,6 @@ public class Destination {
         return new Destination(position, duration, community, DestinationType.COMMUNITY_CENTER);
     }
 
-    public int getDuration() {
-        return duration;
-    }
-
     public double[] getPosition() {
         return position;
     }

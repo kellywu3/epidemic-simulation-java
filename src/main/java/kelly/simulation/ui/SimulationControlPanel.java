@@ -17,6 +17,7 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
     private LabeledInput infectionRadius;
     private LabeledInput minInfectionTime, maxInfectionTime;
     private LabeledInput minDestinationStayTime, maxDestinationStayTime;
+    private LabeledInput quarantineDelay;
     private LabeledInput frictionFactor;
 
     public SimulationControlPanel(SimulationField field) {
@@ -192,6 +193,19 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
             }
         });
         add(maxDestinationStayTime);
+
+        quarantineDelay = new LabeledInput("Quarantine Delay:", CHAR_COUNT, field.getQuarantineDelay());
+        quarantineDelay.setAlignmentX(SwingConstants.RIGHT);
+        quarantineDelay.addActionListener(e -> {
+            int oldVal = field.getQuarantineDelay();
+            try{
+                int time = quarantineDelay.getIntValue();
+                field.setQuarantineDelay(time);
+            } catch(NumberFormatException nfe) {
+                quarantineDelay.setValue(oldVal);
+            }
+        });
+        add(quarantineDelay);
 
         frictionFactor = new LabeledInput("Friction Factor:" , CHAR_COUNT, field.getFrictionFactor());
         frictionFactor.setAlignmentX(SwingConstants.RIGHT);

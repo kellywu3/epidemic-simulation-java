@@ -29,14 +29,14 @@ public class CommunityManager {
 
         if(quarantineOn) {
             dimensions = new double[] {
-                (fieldSize[0] - (boundaryDist * (cols + 2))) / (cols + 1)
-                , (fieldSize[1] - (boundaryDist * (rows + 1))) / rows
+                ((double)fieldSize[0] - (boundaryDist * (cols + 2))) / (cols + 1)
+                , ((double)fieldSize[1] - (boundaryDist * (rows + 1))) / rows
             };
             communities.add(new Bound(new double[] {boundaryDist, boundaryDist}, dimensions));
         } else {
             dimensions = new double[] {
-                (fieldSize[0] - (boundaryDist * (cols + 1))) / cols
-                , (fieldSize[1] - (boundaryDist * (rows + 1))) / rows
+                ((double)fieldSize[0] - (boundaryDist * (cols + 1))) / cols
+                , ((double)fieldSize[1] - (boundaryDist * (rows + 1))) / rows
             };
         }
 
