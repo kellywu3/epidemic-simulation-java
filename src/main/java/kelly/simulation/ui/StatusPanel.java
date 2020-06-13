@@ -10,6 +10,7 @@ public class StatusPanel extends JPanel implements FieldEventListener {
     public static final String TEXT_DESTINATION = "Destination";
     public static final String TEXT_COMMUNITIES = "Communities";
     public static final String TEXT_QUARANTINE = "Quarantine";
+    public static final String TEXT_SOCIAL_DISTANCING = "Social Distancing";
     public static final String TEXT_DESCRIBE = "Describe Subjects";
     public static final String TEXT_PAUSE = "Pause";
     public static final String TEXT_PLAY = "Play";
@@ -19,6 +20,7 @@ public class StatusPanel extends JPanel implements FieldEventListener {
     private JCheckBox enableDestination;
     private JCheckBox enableCommunities;
     private JCheckBox enableQuarantine;
+    private JCheckBox enableSocialDistancing;
     private JCheckBox enableDescription;
     private JButton pauseButton;
     private JButton restartButton;
@@ -34,24 +36,36 @@ public class StatusPanel extends JPanel implements FieldEventListener {
             field.setDestinationOn(!field.destinationOn);
         });
         add(enableDestination);
+        enableDestination.setSelected(field.destinationOn);
 
         enableCommunities = new JCheckBox(TEXT_COMMUNITIES);
         enableCommunities.addActionListener(e -> {
                 field.setCommunityOn(!field.communityOn);
         });
         add(enableCommunities);
+        enableCommunities.setSelected(field.communityOn);
 
         enableQuarantine = new JCheckBox(TEXT_QUARANTINE);
         enableQuarantine.addActionListener(e -> {
             field.setQuarantineOn(!field.quarantineOn);
         });
         add(enableQuarantine);
+        enableQuarantine.setSelected(field.quarantineOn);
+
+
+        enableSocialDistancing = new JCheckBox(TEXT_SOCIAL_DISTANCING);
+        enableSocialDistancing.addActionListener(e -> {
+            field.setSocialDistanceOn(!field.socialDistanceOn);
+        });
+        add(enableSocialDistancing);
+        enableSocialDistancing.setSelected(field.socialDistanceOn);
 
         enableDescription = new JCheckBox(TEXT_DESCRIBE);
         enableDescription.addActionListener(e -> {
             field.setDescribe(!field.describe);
         });
         add(enableDescription);
+        enableDescription.setSelected(field.destinationOn);
 
         pauseButton = new JButton(TEXT_PAUSE);
         pauseButton.addActionListener(e -> {
@@ -64,6 +78,7 @@ public class StatusPanel extends JPanel implements FieldEventListener {
             }
         });
         add(pauseButton);
+        pauseButton.setSelected(field.paused);
 
         restartButton = new JButton(TEXT_RESTART);
         restartButton.addActionListener(e -> {

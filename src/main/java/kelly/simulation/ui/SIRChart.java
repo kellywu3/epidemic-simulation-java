@@ -8,7 +8,7 @@ import java.awt.*;
 import java.util.List;
 
 public class SIRChart extends JComponent implements SimulationEventListener {
-    private SimulationField simulationField;
+    private SimulationField field;
     private static final Color[] DATACOLORS= new Color[]{
         Color.GRAY
             , Color.BLUE
@@ -16,13 +16,13 @@ public class SIRChart extends JComponent implements SimulationEventListener {
     };
 
     public SIRChart(SimulationField simulationField) {
-        this.simulationField = simulationField;
+        this.field = simulationField;
         simulationField.addSimulationEventListener(this);
     }
 
     @Override
     public void paint(Graphics g) {
-        List<int[]> data = simulationField.getTimeData();
+        List<int[]> data = field.getTimeData();
         int dataSize = data.size();
         for(int i = 0; i < dataSize; i++) {
             int[] rec = data.get(i);
@@ -31,7 +31,7 @@ public class SIRChart extends JComponent implements SimulationEventListener {
             int y;
             int j;
             for (j = 0; j<rec.length - 1; j++) {
-                y = rec[j] * getHeight() / simulationField.getSubjectCount() + yp;
+                y = rec[j] * getHeight() / field.getSubjectCount() + yp;
                 g.setColor(DATACOLORS[j]);
                 g.drawLine(x, yp, x, y);
                 yp = y;
@@ -39,6 +39,12 @@ public class SIRChart extends JComponent implements SimulationEventListener {
             g.setColor(DATACOLORS[j]);
             g.drawLine(x, yp, x, getHeight());
         }
+
+        g.setColor(Color.YELLOW);
+        int max = field.getMaxInfected();
+        int yBar = getHeight() - (max * getHeight() / field.getSubjectCount());
+        g.drawLine(getWidth() - 8, yBar, getWidth(), yBar);
+        g.drawString(Integer.toString(max), getWidth() - 40, yBar - g.getFont().getSize());
     }
 
     @Override

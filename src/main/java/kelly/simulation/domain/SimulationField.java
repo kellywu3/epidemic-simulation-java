@@ -24,15 +24,17 @@ public class SimulationField {
     private HashSet<Subject> freeSubjects;
     public CommunityManager manager;
     public boolean paused;
+    private boolean restarting;
+    public boolean describe;
     public boolean destinationOn;
     public boolean communityOn;
     public boolean quarantineOn;
+    public boolean socialDistanceOn;
     private int communityRows;
     private int communityColumns;
     private int subjectCount;
     private double subjectMass;
     public double frictionFactor;
-    private boolean restarting;
     private int eradicatedTime;
     private int[] fieldSize;
     private double oddsOfDestination;
@@ -46,7 +48,9 @@ public class SimulationField {
     private int minStayTime;
     private int maxStayTime;
     private int quarantineDelay;
-    public boolean describe;
+    private double socialDistanceRadius;
+    private double socialDistanceRadiusSquared;
+    private double socialDistanceForce;
 
     private EnumMap<HealthStatus, Animatable> healthAnimation;
 
@@ -98,10 +102,14 @@ public class SimulationField {
         minStayTime = 1;
         maxStayTime = 2;
         quarantineDelay = 3 * timeScale;
+        socialDistanceForce = 0.4;
+        socialDistanceRadius = 20;
+        socialDistanceRadiusSquared = socialDistanceRadius * socialDistanceRadius;
         paused = false;
         destinationOn = false;
         communityOn = false;
         quarantineOn = false;
+        socialDistanceOn = true;
         describe = false;
         init();
         publishFieldEvent();
@@ -297,7 +305,26 @@ public class SimulationField {
     private void updateSubjects() {
         for(int i = 0; i < subjectCount; i++) {
             Subject s = subjects[i];
-            s.update(subjectMass, randomVector(MAX_RANDOM_FORCE), manager, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
+            double[] p1 = s.getPosition();
+            double[] force = randomVector(MAX_RANDOM_FORCE);
+            if(socialDistanceOn) {
+                for(int j = 0; j < subjectCount; j++) {
+                    if(i == j) {
+                        continue;
+                    }
+                    Subject s2 = subjects[j];
+                    double[] p2 = s2.getPosition();
+                    if(p1 != null && p2 != null) {
+                        double r2 = MatrixUtil.distanceSquared(p1, p2);
+                        if(r2 < socialDistanceRadiusSquared) {
+                            for(int h = 0; h < force.length; h++) {
+                                force[h] += (socialDistanceForce * (p1[h] - p2[h]));
+                            }
+                        }
+                    }
+                }
+            }
+            s.update(subjectMass, force, manager, DESTINATION_FORCE_FACTOR, timeIndex, frictionFactor);
             if(s.isTimeToChange(timeIndex)) {
                 s.updateHealth(HealthStatus.REMOVED, timeIndex, -1, quarantineDelay);
             }
@@ -515,5 +542,26 @@ public class SimulationField {
 
     public void setDescribe(boolean describe) {
         this.describe = describe;
+    }
+
+    public void setSocialDistanceOn(boolean socialDistanceOn) {
+        this.socialDistanceOn = socialDistanceOn;
+    }
+
+    public double getSocialDistanceRadius() {
+        return socialDistanceRadius;
+    }
+
+    public void setSocialDistanceRadius(double socialDistanceRadius) {
+        this.socialDistanceRadius = socialDistanceRadius;
+        socialDistanceRadiusSquared = socialDistanceRadius * socialDistanceRadius;
+    }
+
+    public double getSocialDistanceForce() {
+        return socialDistanceForce;
+    }
+
+    public void setSocialDistanceForce(double socialDistanceForce) {
+        this.socialDistanceForce = socialDistanceForce;
     }
 }

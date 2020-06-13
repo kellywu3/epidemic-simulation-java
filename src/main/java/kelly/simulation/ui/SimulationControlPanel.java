@@ -4,21 +4,24 @@ import kelly.simulation.domain.FieldEventListener;
 import kelly.simulation.domain.SimulationField;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class SimulationControlPanel extends JPanel implements FieldEventListener {
-    private static final int CHAR_COUNT = 6;
+    private static final int CHAR_COUNT = 5;
     private SimulationField field;
     private LabeledInput numberOfSubjects;
     private LabeledInput massOfSubjects;
+    private LabeledInput frictionFactor;
     private LabeledInput numberInitialSick;
-    private LabeledInput oddsOfDestination;
     private LabeledInput oddsOfInfection;
     private LabeledInput communityRows, communityColumns;
     private LabeledInput infectionRadius;
     private LabeledInput minInfectionTime, maxInfectionTime;
+    private LabeledInput oddsOfDestination;
     private LabeledInput minDestinationStayTime, maxDestinationStayTime;
     private LabeledInput quarantineDelay;
-    private LabeledInput frictionFactor;
+    private LabeledInput socialDistanceForce, socialDistanceRadius;
 
     public SimulationControlPanel(SimulationField field) {
         this.field = field;
@@ -26,8 +29,10 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
 
         BoxLayout bl = new BoxLayout(this, BoxLayout.PAGE_AXIS);
         setLayout(bl);
+
+        add(new JLabel("Subject Settings"));
+
         numberOfSubjects = new LabeledInput("Number of Subjects:" , CHAR_COUNT, field.getSubjectCount());
-        numberOfSubjects.setAlignmentX(SwingConstants.RIGHT);
         numberOfSubjects.addActionListener(e -> {
             int oldVal = field.getSubjectCount();
             try {
@@ -39,8 +44,43 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(numberOfSubjects);
 
+        massOfSubjects = new LabeledInput("Mass of Subjects:" , CHAR_COUNT, field.getSubjectMass());
+        massOfSubjects.addActionListener(e -> {
+            double oldVal = field.getSubjectMass();
+            try {
+                field.setSubjectMass(massOfSubjects.getDoubleValue());
+            } catch(NumberFormatException nfe) {
+                massOfSubjects.setValue(oldVal);
+            }
+        });
+        add(massOfSubjects);
+
+        frictionFactor = new LabeledInput("Friction Factor:" , CHAR_COUNT, field.getFrictionFactor());
+        frictionFactor.setAlignmentX(SwingConstants.RIGHT);
+        frictionFactor.addActionListener(e -> {
+            double oldVal = field.getFrictionFactor();
+            try {
+                field.setFrictionFactor(frictionFactor.getDoubleValue());
+            } catch(NumberFormatException nfe) {
+                frictionFactor.setValue(oldVal);
+            }
+        });
+        add(frictionFactor);
+
+        add(new JLabel("Infection Settings"));
+
+        numberInitialSick = new LabeledInput("Number Initially Infected:" , CHAR_COUNT, field.getNumberInitialSick());
+        numberInitialSick.addActionListener(e -> {
+            int oldVal = field.getNumberInitialSick();
+            try {
+                field.setNumberInitialSick(numberInitialSick.getIntValue());
+            } catch(NumberFormatException nfe) {
+                numberInitialSick.setValue(oldVal);
+            }
+        });
+        add(numberInitialSick);
+
         infectionRadius = new LabeledInput("Infection Radius:" , CHAR_COUNT, field.getInfectionRadius());
-        infectionRadius.setAlignmentX(SwingConstants.RIGHT);
         infectionRadius.addActionListener(e -> {
             int oldVal = field.getInfectionRadius();
             try {
@@ -52,70 +92,7 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(infectionRadius);
 
-        massOfSubjects = new LabeledInput("Mass of Subjects:" , CHAR_COUNT, field.getSubjectMass());
-        massOfSubjects.setAlignmentX(SwingConstants.RIGHT);
-        massOfSubjects.addActionListener(e -> {
-            double oldVal = field.getSubjectMass();
-            try {
-                field.setSubjectMass(massOfSubjects.getDoubleValue());
-            } catch(NumberFormatException nfe) {
-                massOfSubjects.setValue(oldVal);
-            }
-        });
-        add(massOfSubjects);
-
-        numberInitialSick = new LabeledInput("Number Initially Infected:" , CHAR_COUNT, field.getNumberInitialSick());
-        numberInitialSick.setAlignmentX(SwingConstants.RIGHT);
-        numberInitialSick.addActionListener(e -> {
-            int oldVal = field.getNumberInitialSick();
-            try {
-                field.setNumberInitialSick(numberInitialSick.getIntValue());
-            } catch(NumberFormatException nfe) {
-                numberInitialSick.setValue(oldVal);
-            }
-        });
-        add(numberInitialSick);
-
-        communityRows = new LabeledInput("Number of Community Rows:" , CHAR_COUNT, field.getCommunityRows());
-        communityRows.setAlignmentX(SwingConstants.RIGHT);
-        communityRows.addActionListener(e -> {
-            int oldVal = field.getCommunityRows();
-            try {
-                field.changeCommunityRows(communityRows.getIntValue());
-                field.setCommunityOn(true);
-            } catch(NumberFormatException nfe) {
-                communityRows.setValue(oldVal);
-            }
-        });
-        add(communityRows);
-
-        communityColumns = new LabeledInput("Number of Community Columns:" , CHAR_COUNT, field.getCommunityColumns());
-        communityColumns.setAlignmentX(SwingConstants.RIGHT);
-        communityColumns.addActionListener(e -> {
-            int oldVal = field.getCommunityColumns();
-            try {
-                field.changeCommunityColumns(communityColumns.getIntValue());
-                field.setCommunityOn(true);
-            } catch(NumberFormatException nfe) {
-                communityColumns.setValue(oldVal);
-            }
-        });
-        add(communityColumns);
-
-        oddsOfDestination = new LabeledInput("Odds of Traveling to Destination:" , CHAR_COUNT, field.getOddsOfDestination());
-        oddsOfDestination.setAlignmentX(SwingConstants.RIGHT);
-        oddsOfDestination.addActionListener(e -> {
-            double oldVal = field.getOddsOfDestination();
-            try {
-                field.setOddsOfDestination(oddsOfDestination.getDoubleValue());
-            } catch(NumberFormatException nfe) {
-                oddsOfDestination.setValue(oldVal);
-            }
-        });
-        add(oddsOfDestination);
-
         oddsOfInfection = new LabeledInput("Odds of Infection:" , CHAR_COUNT, field.getOddsOfInfection());
-        oddsOfInfection.setAlignmentX(SwingConstants.RIGHT);
         oddsOfInfection.addActionListener(e -> {
             double oldVal = field.getOddsOfInfection();
             try {
@@ -144,7 +121,6 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         add(minInfectionTime);
 
         maxInfectionTime = new LabeledInput("Maximum Infection Time:" , CHAR_COUNT, field.getMaxInfectionTime());
-        maxInfectionTime.setAlignmentX(SwingConstants.RIGHT);
         maxInfectionTime.addActionListener(e -> {
             int oldVal = field.getMaxInfectionTime();
             try {
@@ -160,8 +136,46 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(maxInfectionTime);
 
+        add(new JLabel("Community Settings"));
+
+        communityRows = new LabeledInput("Number of Community Rows:" , CHAR_COUNT, field.getCommunityRows());
+        communityRows.addActionListener(e -> {
+            int oldVal = field.getCommunityRows();
+            try {
+                field.changeCommunityRows(communityRows.getIntValue());
+                field.setCommunityOn(true);
+            } catch(NumberFormatException nfe) {
+                communityRows.setValue(oldVal);
+            }
+        });
+        add(communityRows);
+
+        communityColumns = new LabeledInput("Number of Community Columns:" , CHAR_COUNT, field.getCommunityColumns());
+        communityColumns.addActionListener(e -> {
+            int oldVal = field.getCommunityColumns();
+            try {
+                field.changeCommunityColumns(communityColumns.getIntValue());
+                field.setCommunityOn(true);
+            } catch(NumberFormatException nfe) {
+                communityColumns.setValue(oldVal);
+            }
+        });
+        add(communityColumns);
+
+        add(new JLabel("Destination Settings"));
+
+        oddsOfDestination = new LabeledInput("Odds of Traveling to Destination:" , CHAR_COUNT, field.getOddsOfDestination());
+        oddsOfDestination.addActionListener(e -> {
+            double oldVal = field.getOddsOfDestination();
+            try {
+                field.setOddsOfDestination(oddsOfDestination.getDoubleValue());
+            } catch(NumberFormatException nfe) {
+                oddsOfDestination.setValue(oldVal);
+            }
+        });
+        add(oddsOfDestination);
+
         minDestinationStayTime = new LabeledInput("Minimum Destination Stay Time:" , CHAR_COUNT, field.getMinStayTime());
-        minDestinationStayTime.setAlignmentX(SwingConstants.RIGHT);
         minDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMinStayTime();
             try {
@@ -178,7 +192,6 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         add(minDestinationStayTime);
 
         maxDestinationStayTime = new LabeledInput("Maximum Destination Stay Time:" , CHAR_COUNT, field.getMaxStayTime());
-        maxDestinationStayTime.setAlignmentX(SwingConstants.RIGHT);
         maxDestinationStayTime.addActionListener(e -> {
             int oldVal = field.getMaxStayTime();
             try {
@@ -194,8 +207,9 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(maxDestinationStayTime);
 
+        add(new JLabel("Quarantine Settings"));
+
         quarantineDelay = new LabeledInput("Quarantine Delay:", CHAR_COUNT, field.getQuarantineDelay());
-        quarantineDelay.setAlignmentX(SwingConstants.RIGHT);
         quarantineDelay.addActionListener(e -> {
             int oldVal = field.getQuarantineDelay();
             try{
@@ -207,17 +221,44 @@ public class SimulationControlPanel extends JPanel implements FieldEventListener
         });
         add(quarantineDelay);
 
-        frictionFactor = new LabeledInput("Friction Factor:" , CHAR_COUNT, field.getFrictionFactor());
-        frictionFactor.setAlignmentX(SwingConstants.RIGHT);
-        frictionFactor.addActionListener(e -> {
-            double oldVal = field.getFrictionFactor();
-            try {
-                field.setFrictionFactor(frictionFactor.getDoubleValue());
+        add(new JLabel("Social Distancing Settings"));
+
+        socialDistanceForce = new LabeledInput("Social Distance Force:", CHAR_COUNT, field.getSocialDistanceForce());
+        socialDistanceForce.addActionListener(e -> {
+            double oldVal = field.getSocialDistanceForce();
+            try{
+                field.setSocialDistanceForce(socialDistanceForce.getDoubleValue());
             } catch(NumberFormatException nfe) {
-                frictionFactor.setValue(oldVal);
+                socialDistanceForce.setValue(oldVal);
             }
         });
-        add(frictionFactor);
+        add(socialDistanceForce);
+
+        socialDistanceRadius = new LabeledInput("Social Distance Radius:", CHAR_COUNT, field.getSocialDistanceRadius());
+        socialDistanceRadius.addActionListener(e -> {
+            double oldVal = field.getSocialDistanceRadius();
+            try{
+                field.setSocialDistanceRadius(socialDistanceRadius.getDoubleValue());
+            } catch(NumberFormatException nfe) {
+                socialDistanceRadius.setValue(oldVal);
+            }
+        });
+        add(socialDistanceRadius);
+
+        for(Component c : getComponents()) {
+            if(c instanceof JLabel) {
+                JLabel jl = (JLabel) c;
+                jl.setAlignmentX(SwingConstants.LEFT);
+                jl.setForeground(Color.BLUE);
+                jl.setBorder(new EmptyBorder(16, 0, 2, CHAR_COUNT * 2));
+                Font oldFont = jl.getFont();
+                Font newFont = new Font(oldFont.getName(), Font.BOLD, oldFont.getSize() + 2);
+                jl.setFont(newFont);
+            } else if(c instanceof LabeledInput) {
+                LabeledInput li = (LabeledInput) c;
+                li.setAlignmentX(SwingConstants.RIGHT);
+            }
+        }
     }
 
     @Override
